@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Query, Depends
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String, Date
+from sqlalchemy import create_engine, Column, Integer, String, Date, func
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Optional, List
@@ -17,6 +17,7 @@ Base = declarative_base()
 
 app = FastAPI()
 
+# 유저 데이터 모델 생성(테이블 생성)
 class Userdata(Base):
     __tablename__ = "userdata"
     id = Column(Integer, primary_key=True, index=True)
@@ -28,6 +29,7 @@ class Userdata(Base):
 
 Base.metadata.create_all(bind=engine) # 데이터베이스 테이블 생성
 
+# 입력받은 유저 데이터의 유효성을 검사하는 모델
 class UserdataCreate(BaseModel):
     transaction_type: str
     description: str
@@ -35,6 +37,7 @@ class UserdataCreate(BaseModel):
     amount: int
     date: date
 
+# 리턴하는 데이터의 유효성을 검사하는 모델
 class UserdataResponse(BaseModel):
     id: int
     transaction_type: str
@@ -43,8 +46,14 @@ class UserdataResponse(BaseModel):
     amount: int
     date: date
 
+    # sqlalchemy 모델을 json으로 자동으로 변환
     class Config:
         orm_mode = True
+
+# 지출 내역의 총액 순위의 기본모델
+class ExpenseSummary(BaseModel):
+    description: str
+    total_amount: int
 
 # DB 세션 의존성
 def get_db():
@@ -57,7 +66,7 @@ def get_db():
 # 데이터 생성 API
 @app.post("/userdata/", response_model=UserdataResponse)
 def create_userdata(userdata: UserdataCreate, db: Session = Depends(get_db)):
-    db_userdata = Userdata(**userdata.dict())
+    db_userdata = Userdata(**userdata.model_dump())
     db.add(db_userdata)
     db.commit()
     db.refresh(db_userdata)
@@ -74,17 +83,27 @@ def read_userdata_by_type(transaction_type: Optional[str] = Query(None), db: Ses
     userdatas = query.all()
     return userdatas
 
-# 지출 데이터 조회 API (금액만 반환)
+# 지출 데이터 조회 API (총 금액만 반환)
 @app.get("/userdata/expense/", response_model=List[dict])
 def read_user_expense_amount(db: Session = Depends(get_db)):
     expense_amount = db.query(Userdata.amount).filter(Userdata.transaction_type == "지출").all()
     expense_datas = [{"amount": amount[0]} for amount in expense_amount]
     return expense_datas
 
-# 수입 데이터 조회 API (금액만 반환)
+# 수입 데이터 조회 API (총 금액만 반환)
 @app.get("/userdata/income/", response_model=List[dict])
 def read_user_income_amount(db: Session = Depends(get_db)):
     income_amount = db.query(Userdata.amount).filter(Userdata.transaction_type == "수입").all()
     income_datas = [{"amount": amount[0]} for amount in income_amount]
     return income_datas
+
+# 지출 금액의 순위 조회 API
+@app.get("/userdata/expense/ranking/", response_model=List[ExpenseSummary])
+def expense_ranking(db: Session = Depends(get_db)):
+    expense_rank = (db.query(Userdata.description, func.sum(Userdata.amount).label("total_amount"))
+                    .filter(Userdata.transaction_type == "지출")
+                    .group_by(Userdata.description)
+                    .all())
+    return expense_rank
+
 
