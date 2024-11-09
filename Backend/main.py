@@ -1,11 +1,15 @@
-from fastapi import FastAPI, Query, Depends
-from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Date, func
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from fastapi import FastAPI, Query, Depends,HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, List
-from datetime import date
 from decouple import AutoConfig
+import matplotlib.pyplot as plt
+from pydantic import BaseModel
+from datetime import datetime
+from datetime import date
+import pandas as pd
+
 
 config = AutoConfig()
 
@@ -63,6 +67,15 @@ def get_db():
     finally:
         db.close()
 
+# 연도와 월을 받아 해당 월의 시작일과 종료일을 반환하는 함수
+def get_month_range(year: int, month: int):
+    start_of_month = datetime(year, month, 1)
+    if month == 12:
+        end_of_month = datetime(year + 1, 1, 1)
+    else:
+        end_of_month = datetime(year, month + 1, 1)
+    return start_of_month, end_of_month
+
 # 데이터 생성 API
 @app.post("/userdata/", response_model=UserdataResponse)
 def create_userdata(userdata: UserdataCreate, db: Session = Depends(get_db)):
@@ -72,38 +85,95 @@ def create_userdata(userdata: UserdataCreate, db: Session = Depends(get_db)):
     db.refresh(db_userdata)
     return db_userdata
 
-# 지출 및 수입 데이터 조회 API (특정 타입만 필터링 가능)
-@app.get("/userdata/all_type/", response_model=List[UserdataResponse])
-def read_userdata_by_type(transaction_type: Optional[str] = Query(None), db: Session = Depends(get_db)):
-    query = db.query(Userdata)
-    if transaction_type:
-        query = query.filter(Userdata.transaction_type == transaction_type)
-    else:
-        query = query.filter(Userdata.transaction_type.in_(["지출", "수입"]))
-    userdatas = query.all()
-    return userdatas
-
 # 지출 데이터 조회 API (총 금액만 반환)
 @app.get("/userdata/expense/", response_model=List[dict])
-def read_user_expense_amount(db: Session = Depends(get_db)):
-    expense_amount = db.query(Userdata.amount).filter(Userdata.transaction_type == "지출").all()
+def read_user_expense_amount(
+    year: int = Query(..., description="조회할 년도"),
+    month: int = Query(..., description="조회할 월"),
+    db: Session = Depends(get_db)
+    ):
+
+    try:
+        start_of_month, end_of_month = get_month_range(year,month)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="유효하지 않은 연도 또는 월입니다.")
+    
+    # 해당 월의 지출 데이터 필터링
+    expense_amount = (
+        db.query(Userdata.amount)
+        .filter(Userdata.transaction_type == "지출")
+        .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+        .all()
+    )
+
+    # 결과를 딕셔너리로 변환하여 반환
     expense_datas = [{"amount": amount[0]} for amount in expense_amount]
     return expense_datas
 
 # 수입 데이터 조회 API (총 금액만 반환)
 @app.get("/userdata/income/", response_model=List[dict])
-def read_user_income_amount(db: Session = Depends(get_db)):
-    income_amount = db.query(Userdata.amount).filter(Userdata.transaction_type == "수입").all()
+def read_user_income_amount(
+    year: int = Query(...,description="조회할 년도"),
+    month: int = Query(..., description="조회할 월"),
+    db: Session = Depends(get_db)
+    ):
+    
+    try:
+        start_of_month, end_of_month = get_month_range(year, month)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="유효하지 않은 연도 또는 월입니다.")
+
+    # 해당 월의 수입 데이터만 필터링
+    income_amount = (
+        db.query(Userdata.amount)
+        .filter(Userdata.transaction_type == "수입")
+        .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+        .all()
+    )
+
+    # 결과를 딕셔너리로 변환하여 반환
     income_datas = [{"amount": amount[0]} for amount in income_amount]
     return income_datas
 
 # 지출 금액의 순위 조회 API
-@app.get("/userdata/expense/ranking/", response_model=List[ExpenseSummary])
-def expense_ranking(db: Session = Depends(get_db)):
-    expense_rank = (db.query(Userdata.description, func.sum(Userdata.amount).label("total_amount"))
-                    .filter(Userdata.transaction_type == "지출")
-                    .group_by(Userdata.description)
-                    .all())
-    return expense_rank
+@app.get("/userdata/expense/ranking/", response_model=List[dict])
+def expense_ranking(
+    year: int = Query(..., description="조회할 연도"),
+    month: int = Query(..., description="조회할 월"),
+    db: Session = Depends(get_db)
+):
+    start_of_month, end_of_month = get_month_range(year, month)
 
+    try:
+        # 해당 월의 지출 금액을 description 별로 합산하여 순위 조회
+        expense_rank = (
+            db.query(Userdata.description, func.sum(Userdata.amount).label("total_amount"))
+            .filter(Userdata.transaction_type == "지출")
+            .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+            .group_by(Userdata.description)
+            .order_by(func.sum(Userdata.amount).desc())
+            .all()
+        )
 
+    except SQLAlchemyError as e:
+        # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
+        print(f"SQLAlchemy Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="지출 랭킹 데이터베이스 쿼리 중 오류가 발생했습니다.")
+
+    # 결과가 비어 있는 경우 예외 처리
+    if not expense_rank:
+        return [{"description": "데이터 없음", "total_amount": 0}]
+    
+    # 안전한 데이터 접근
+    expense_rank_data = [
+        {
+            "description": item[0] if len(item) > 0 else "데이터 없음",
+            "total_amount": item[1] if len(item) > 1 else 0
+        }
+        for item in expense_rank
+    ]
+    return expense_rank_data
+
+# 순위를 그래프로 보여주는 API
+# @app.get("userdata/expense/graph/")
+# def expense_graph(db: Session = Depends(get_db)):
