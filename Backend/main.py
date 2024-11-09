@@ -27,7 +27,7 @@ class Userdata(Base):
     id = Column(Integer, primary_key=True, index=True)
     transaction_type = Column(String, index=True)   # 지출 또는 수입
     description = Column(String, index=True)        # 내역 (식비, 교통비, 쇼핑, 기타 등)
-    description_detail = Column(String, nullable=True)  # 기타일 경우 설명 추가 (nullable)
+    description_detail = Column(String, index=True)  # 기타일 경우 설명 추가 (nullable)
     amount = Column(Integer, index=True)            # 금액
     date = Column(Date, index=True)  
 
@@ -37,7 +37,7 @@ Base.metadata.create_all(bind=engine) # 데이터베이스 테이블 생성
 class UserdataCreate(BaseModel):
     transaction_type: str
     description: str
-    description_detail: Optional[str] = None  # 선택적 필드로 설정
+    description_detail: str 
     amount: int
     date: date
 
@@ -46,7 +46,7 @@ class UserdataResponse(BaseModel):
     id: int
     transaction_type: str
     description: str
-    description_detail: Optional[str] = None
+    description_detail: str
     amount: int
     date: date
 
@@ -177,17 +177,27 @@ def expense_ranking(
 # 지출 항목별 상세 내역 조회 API
 @app.get("/userdata/expense/details/", response_model=List[dict])
 def get_expense_details(
+    year: int = Query(..., description="조회할 년도"),
+    month: int = Query(..., description="조회할 월"),
     description: str = Query(..., description="지출 항목 이름"),
     db: Session = Depends(get_db)
 ):
+    
+    start_of_month, end_of_month = get_month_range(year, month)
+
     # 특정 description의 상세 내역 조회
-    expense_details = db.query(Userdata).filter(Userdata.description == description).all()
+    expense_details = (
+        db.query(Userdata)
+        .filter(Userdata.description == description)
+        .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+        .all())
     
     # 결과를 딕셔너리 형태로 반환
     details = [
         {
             "날짜": detail.date,
-            "항목": detail.description,
+            "내역": detail.description,
+            "상세내역": detail.description_detail,
             "금액": detail.amount
         }
         for detail in expense_details
