@@ -55,7 +55,7 @@ def display_expense_data(params, year, month):
 
         # 지출 랭킹 데이터 가져오기
         rank_data = fetch_data(GET_EXPENSE_RANKING, params=params)
-        st.markdown(f"### {year}년 {month}월 지출 내역별 랭킹")
+        st.markdown(f"### {year}년 {month}월 지출 내역 순위")
         for i, item in enumerate(rank_data, start=1):
             st.write(f"{i}. {item['description']}: {item['total_amount']:,} 원")
 
