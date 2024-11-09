@@ -29,7 +29,7 @@ def data_entry_page():
     submit_button = st.columns(1)[0]
 
     # 제출 버튼 클릭 시 데이터 전송
-    if submit_button.button("제출", use_container_width=True):
+    if submit_button.button("제출", use_container_width=True, type="primary"):
         userdata = {
             "transaction_type": transaction_type,
             "description": description,

@@ -174,6 +174,22 @@ def expense_ranking(
     ]
     return expense_rank_data
 
-# 순위를 그래프로 보여주는 API
-# @app.get("userdata/expense/graph/")
-# def expense_graph(db: Session = Depends(get_db)):
+# 지출 항목별 상세 내역 조회 API
+@app.get("/userdata/expense/details/", response_model=List[dict])
+def get_expense_details(
+    description: str = Query(..., description="지출 항목 이름"),
+    db: Session = Depends(get_db)
+):
+    # 특정 description의 상세 내역 조회
+    expense_details = db.query(Userdata).filter(Userdata.description == description).all()
+    
+    # 결과를 딕셔너리 형태로 반환
+    details = [
+        {
+            "날짜": detail.date,
+            "항목": detail.description,
+            "금액": detail.amount
+        }
+        for detail in expense_details
+    ]
+    return details
