@@ -6,18 +6,6 @@ from decouple import AutoConfig
 config = AutoConfig()
 DATA_CREATE = config("DATA_CREATE")
 
-# 입력 필드를 초기화하는 함수
-def reset_form():
-    st.session_state["transaction_type"] = "지출"
-    st.session_state["description"] = "식비"
-    st.session_state["description_detail"] = ""
-    st.session_state["amount"] = 0
-    st.session_state["date_input"] = date.today()
-
-# 페이지 처음 로드 시 상태 초기화
-if "transaction_type" not in st.session_state:
-    reset_form()
-
 def data_entry_page():
     st.header("데이터를 입력하세요")
     
@@ -38,7 +26,7 @@ def data_entry_page():
     date_input = st.date_input("날짜", value=date.today())
     
     # 제출 버튼
-    submit_button, reset_button = st.columns(2)
+    submit_button = st.columns(1)[0]
 
     # 제출 버튼 클릭 시 데이터 전송
     if submit_button.button("제출", use_container_width=True):
@@ -58,5 +46,3 @@ def data_entry_page():
         else:
             st.error(f"오류 발생: {response.status_code}")
             st.write(response.text)
-    if reset_button.button("초기화", use_container_width=True, on_click=reset_form()):
-        st.rerun()
