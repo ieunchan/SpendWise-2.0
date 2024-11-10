@@ -27,7 +27,7 @@ class Userdata(Base):
     id = Column(Integer, primary_key=True, index=True)
     transaction_type = Column(String, index=True)   # 지출 또는 수입
     description = Column(String, index=True)        # 내역 (식비, 교통비, 쇼핑, 기타 등)
-    description_detail = Column(String, index=True)  # 기타일 경우 설명 추가 (nullable)
+    description_detail = Column(String, nullable=True)  # 기타일 경우 설명 추가 (nullable)
     amount = Column(Integer, index=True)            # 금액
     date = Column(Date, index=True)  
 
@@ -37,7 +37,7 @@ Base.metadata.create_all(bind=engine) # 데이터베이스 테이블 생성
 class UserdataCreate(BaseModel):
     transaction_type: str
     description: str
-    description_detail: str 
+    description_detail: Optional[str] = None 
     amount: int
     date: date
 
@@ -46,7 +46,7 @@ class UserdataResponse(BaseModel):
     id: int
     transaction_type: str
     description: str
-    description_detail: str
+    description_detail: Optional[str] = None
     amount: int
     date: date
 
@@ -68,7 +68,7 @@ def get_db():
         db.close()
 
 # 연도와 월을 받아 해당 월의 시작일과 종료일을 반환하는 함수
-def get_month_range(year: int, month: int):
+def get_month_range(year: int, month: int, day: Optional[int] = None):
     start_of_month = datetime(year, month, 1)
     if month == 12:
         end_of_month = datetime(year + 1, 1, 1)
@@ -203,3 +203,65 @@ def get_expense_details(
         for detail in expense_details
     ]
     return details
+
+
+@app.get("/userdata/income/ranking/", response_model=List[dict])
+def income_ranking(
+    year: int = Query(..., description="조회할 년도"),
+    month: int = Query(..., description="조회할 월"),
+    db: Session = Depends(get_db)
+):
+    start_of_month, end_of_month = get_month_range(year, month)
+
+    try:
+        income_rank = (
+            db.query(Userdata)
+            .filter(Userdata.transaction_type == "수입")
+            .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+            .order_by(Userdata.date.desc())
+            .all()
+            )
+    except SQLAlchemyError as e:
+        # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
+        print(f"SQLAlchemy Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="수입 랭킹 데이터베이스 쿼리 중 오류가 발생했습니다.")
+    
+    if not income_rank:
+        return [{"날짜": "데이터 없음", "내역": "내역 없음", "금액": 0}]
+    
+    income_rank_data = [
+        {
+        "날짜": income.date.strftime("%Y-%m-%d"),  # 날짜를 "YYYY-MM-DD" 형식으로 변환
+        "내역": income.description,
+        "금액": income.amount  
+        }
+    for income in income_rank
+    ]
+    return income_rank_data
+
+# @app.get("/userdata/total_asset/", response_model=List[dict])
+# def get_total_assets(db: Session = Depends(get_db)):
+#     def get_total_by_type(transaction_type: str):
+#         try:
+#             # 트랜잭션 유형에 따라 합계를 계산
+#             result = (
+#                 db.query(func.sum(Userdata.amount).label("total_amount"))
+#                 .filter(Userdata.transaction_type == transaction_type)
+#                 .scalar()  # 합계 값을 직접 가져오기
+#             )
+#             return result or 0  # None일 경우 0 반환
+#         except SQLAlchemyError as e:
+#             print(f"SQLAlchemy Error: {str(e)}")
+#             raise HTTPException(
+#                 status_code=500,
+#                 detail=f"{transaction_type} 총액 데이터베이스 쿼리 중 오류가 발생했습니다."
+#             )
+
+#     # 수입과 지출의 합계 계산
+#     total_income = get_total_by_type("수입")
+#     total_expend = get_total_by_type("지출")
+
+#     # 총 자산 계산
+#     total_assets = total_income - total_expend
+
+#     return [{"총 자산": total_assets, "총 수입": total_income, "총 지출": total_expend}]

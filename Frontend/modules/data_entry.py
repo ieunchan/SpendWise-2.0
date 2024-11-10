@@ -1,7 +1,7 @@
-import streamlit as st
-from datetime import date
-import requests
 from decouple import AutoConfig
+from datetime import date
+import streamlit as st
+import requests
 
 config = AutoConfig()
 DATA_CREATE = config("DATA_CREATE")

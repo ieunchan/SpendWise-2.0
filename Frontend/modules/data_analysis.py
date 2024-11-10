@@ -1,9 +1,9 @@
+from modules.api_list import GET_USERDATA_EXPENSE, GET_USERDATA_INCOME, GET_EXPENSE_RANKING, GET_EXPENSE_DETAILS, GET_INCOME_RANKING
+from modules.ui_elements import display_pie_chart
+from modules.utils import fetch_data
+from datetime import datetime
 import streamlit as st
 import pandas as pd
-from datetime import datetime
-from modules.api_list import GET_USERDATA_EXPENSE, GET_USERDATA_INCOME, GET_EXPENSE_RANKING, GET_EXPENSE_DETAILS
-from modules.utils import fetch_data
-from modules.ui_elements import display_pie_chart
 
 def data_analysis_page():
     """데이터 분석 페이지를 표시하는 함수"""
@@ -93,16 +93,24 @@ def display_income_data(params, year, month):
         st.markdown(
             f"<span style='color:#1E90FF; font-size:24px;'>{year}년 {month}월 수입 : {total_income:,} 원</span>",
             unsafe_allow_html=True)
+        
+        # 수입 랭킹 데이터 가져오기
+        income_rank_data = fetch_data(GET_INCOME_RANKING, params=params)
+        st.markdown(f"### {year}년 {month}월 수입 순위")
+        for i, item in enumerate(income_rank_data, start=1):
+            st.markdown(f"##### • {item['날짜']} [{item['내역']}]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item['금액']:,}원") # &nbsp;은 마크다운 문법에서 공백입니다.
+
     except ValueError as e:
         st.error(e)
 
 def display_expense_details(selected_category, params):
     """선택된 항목에 대한 상세 내역을 표시하는 함수"""
-    detail_params = {**params, "description": selected_category}
+    detail_params = {**params, "description": selected_category} # **params는 기존 params({year: year}, {month: month}에 description을 추가함)
     expense_details = fetch_data(GET_EXPENSE_DETAILS, params=detail_params)
 
     if expense_details:
         detail_dataframe = pd.DataFrame(expense_details)
+        detail_dataframe['금액'] = detail_dataframe['금액'].apply(lambda x: f"{x:,}") # 상세보기 '금액' 부분에 세자리마다 콤마(,) 추가
         st.markdown(f"### {selected_category} 상세 내역")
         st.table(detail_dataframe)
     else:
