@@ -4,7 +4,7 @@ from fastapi import FastAPI, Query, Depends,HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, List
 from decouple import AutoConfig
-import matplotlib.pyplot as plt
+from sqlalchemy.sql import and_
 from pydantic import BaseModel
 from datetime import datetime
 from datetime import date
@@ -25,7 +25,7 @@ app = FastAPI()
 class Userdata(Base):
     __tablename__ = "userdata"
     id = Column(Integer, primary_key=True, index=True)
-    transaction_type = Column(String, index=True)   # 지출 또는 수입
+    transaction_type = Column(String, index=True)   # 지출 또는 소득
     description = Column(String, index=True)        # 내역 (식비, 교통비, 쇼핑, 기타 등)
     description_detail = Column(String, nullable=True)  # 기타일 경우 설명 추가 (nullable)
     amount = Column(Integer, index=True)            # 금액
@@ -110,7 +110,7 @@ def read_user_expense_amount(
     expense_datas = [{"amount": amount[0]} for amount in expense_amount]
     return expense_datas
 
-# 수입 데이터 조회 API (총 금액만 반환)
+# 소득 데이터 조회 API (총 금액만 반환)
 @app.get("/userdata/income/", response_model=List[dict])
 def read_user_income_amount(
     year: int = Query(...,description="조회할 년도"),
@@ -123,10 +123,10 @@ def read_user_income_amount(
     except ValueError:
         raise HTTPException(status_code=400, detail="유효하지 않은 연도 또는 월입니다.")
 
-    # 해당 월의 수입 데이터만 필터링
+    # 해당 월의 소득 데이터만 필터링
     income_amount = (
         db.query(Userdata.amount)
-        .filter(Userdata.transaction_type == "수입")
+        .filter(Userdata.transaction_type == "소득")
         .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
         .all()
     )
@@ -216,7 +216,7 @@ def income_ranking(
     try:
         income_rank = (
             db.query(Userdata)
-            .filter(Userdata.transaction_type == "수입")
+            .filter(Userdata.transaction_type == "소득")
             .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
             .order_by(Userdata.date.desc())
             .all()
@@ -224,7 +224,7 @@ def income_ranking(
     except SQLAlchemyError as e:
         # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
         print(f"SQLAlchemy Error: {str(e)}")
-        raise HTTPException(status_code=500, detail="수입 랭킹 데이터베이스 쿼리 중 오류가 발생했습니다.")
+        raise HTTPException(status_code=500, detail="소득 랭킹 데이터베이스 쿼리 중 오류가 발생했습니다.")
     
     if not income_rank:
         return [{"날짜": "데이터 없음", "내역": "내역 없음", "금액": 0}]
@@ -239,14 +239,16 @@ def income_ranking(
     ]
     return income_rank_data
 
+# 총 자산, 총 소득, 총 지출을 표시하는 API
 # @app.get("/userdata/total_asset/", response_model=List[dict])
 # def get_total_assets(db: Session = Depends(get_db)):
-#     def get_total_by_type(transaction_type: str):
+#     def get_total_by_type(transaction_type: str, year: int):
 #         try:
 #             # 트랜잭션 유형에 따라 합계를 계산
 #             result = (
 #                 db.query(func.sum(Userdata.amount).label("total_amount"))
 #                 .filter(Userdata.transaction_type == transaction_type)
+#                 .filter(func.extract('year', Userdata.date) == year)
 #                 .scalar()  # 합계 값을 직접 가져오기
 #             )
 #             return result or 0  # None일 경우 0 반환
@@ -257,11 +259,59 @@ def income_ranking(
 #                 detail=f"{transaction_type} 총액 데이터베이스 쿼리 중 오류가 발생했습니다."
 #             )
 
-#     # 수입과 지출의 합계 계산
-#     total_income = get_total_by_type("수입")
+#     # 소득과 지출의 합계 계산
+#     total_income = get_total_by_type("소득")
 #     total_expend = get_total_by_type("지출")
 
 #     # 총 자산 계산
 #     total_assets = total_income - total_expend
 
-#     return [{"총 자산": total_assets, "총 수입": total_income, "총 지출": total_expend}]
+#     return [{"총 자산": total_assets, "총 소득": total_income, "총 지출": total_expend}]
+
+# 년간 지출 합계를 반환하는 API
+@app.get("/userdata/expense/annual", response_model=List[ExpenseSummary])
+def get_annual_expense_by_description(
+    year: int = Query(..., description="조회할 연도"),
+    transaction_type: str = Query(..., description="년도 별 지출"),
+    db: Session = Depends(get_db)
+):
+    try:
+        # 연도별 소득 또는 지출 합계를 description별로 합산하여 조회
+        annual_expense = (
+            db.query(Userdata.description, func.sum(Userdata.amount).label("total_amount"))
+            .filter(
+                and_(
+                    Userdata.transaction_type == transaction_type,  # 거래 유형 필터
+                    func.extract('year', Userdata.date) == year  # 연도 필터링
+                )
+            )
+            .group_by(Userdata.description)
+            .order_by(func.sum(Userdata.amount).desc())  # 금액 순으로 정렬
+            .all()
+        )
+
+        # 결과가 비어 있을 경우 기본 값 반환
+        if not annual_expense:
+            return [{"description": "데이터 없음", "total_amount": 0}]
+        
+        # Pydantic 모델 형식에 맞게 데이터 변환
+        annual_expense_data = [
+            ExpenseSummary(description=item[0], total_amount=item[1])
+            for item in annual_expense
+        ]
+        
+        return annual_expense_data
+
+    except SQLAlchemyError as e:
+        # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
+        print(f"SQLAlchemy Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="연도별 데이터베이스 쿼리 중 오류가 발생했습니다.")
+
+# @app.get("/userdata/income/annual", response_model = List[dict])
+# def get_annual_income(
+#     year: int = Query(..., description="조회할 년도"),
+#     transcation_type: str = Query(..., description="년도 별 소득"),
+#     db: Session = Depends(get_db)
+# ):
+#     try
+        

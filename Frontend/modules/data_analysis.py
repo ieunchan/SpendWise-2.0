@@ -11,7 +11,7 @@ def data_analysis_page():
     type_input, year_input, month_input = st.columns(3)
 
     with type_input:
-        transaction_type = st.selectbox("조회할 데이터", ["지출", "수입"])
+        transaction_type = st.selectbox("조회할 데이터", ["지출", "소득"])
 
     with year_input:
         current_year = datetime.now().year
@@ -39,7 +39,7 @@ def data_analysis_page():
 
         if transaction_type == "지출":
             display_expense_data(params, year, month)
-        elif transaction_type == "수입":
+        elif transaction_type == "소득":
             display_income_data(params, year, month)
 
 
@@ -85,18 +85,18 @@ def display_expense_data(params, year, month):
 
 
 def display_income_data(params, year, month):
-    """수입 데이터를 조회하고 결과를 Streamlit에 표시하는 함수"""
+    """소득 데이터를 조회하고 결과를 Streamlit에 표시하는 함수"""
     try:
-        # 수입 데이터 가져오기
+        # 소득 데이터 가져오기
         income_data = fetch_data(GET_USERDATA_INCOME, params=params)
         total_income = sum(income['amount'] for income in income_data)
         st.markdown(
-            f"<span style='color:#1E90FF; font-size:24px;'>{year}년 {month}월 수입 : {total_income:,} 원</span>",
+            f"<span style='color:#1E90FF; font-size:24px;'>{year}년 {month}월 소득 : {total_income:,} 원</span>",
             unsafe_allow_html=True)
         
-        # 수입 랭킹 데이터 가져오기
+        # 소득 랭킹 데이터 가져오기
         income_rank_data = fetch_data(GET_INCOME_RANKING, params=params)
-        st.markdown(f"### {year}년 {month}월 수입 순위")
+        st.markdown(f"### {year}년 {month}월 소득 순위")
         for i, item in enumerate(income_rank_data, start=1):
             st.markdown(f"##### • {item['날짜']} [{item['내역']}]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item['금액']:,}원") # &nbsp;은 마크다운 문법에서 공백입니다.
 

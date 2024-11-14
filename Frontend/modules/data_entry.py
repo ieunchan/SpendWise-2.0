@@ -10,14 +10,14 @@ def data_entry_page():
     st.header("데이터를 입력하세요")
     
     # 거래 유형 선택
-    transaction_type = st.selectbox("거래 유형", ["지출", "수입"])
+    transaction_type = st.selectbox("거래 유형", ["지출", "소득"])
 
     # 거래 유형에 따라 다른 입력 요소 표시
     if transaction_type == "지출":
         description = st.selectbox("내역", ["식비", "교통비", "쇼핑", "기타"])
         description_detail = st.text_input("상세 내역 설명을 입력하세요")
     else:
-        description = st.text_input("수입 내역")
+        description = st.text_input("소득 내역")
         description_detail = None
 
     # 나머지 입력 필드
