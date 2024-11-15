@@ -1,5 +1,5 @@
 from modules.api_list import GET_USERDATA_EXPENSE, GET_USERDATA_INCOME, GET_EXPENSE_RANKING, GET_EXPENSE_DETAILS, GET_INCOME_RANKING
-from modules.ui_elements import display_pie_chart
+from modules.ui_elements import display_expense_pie_chart,display_income_pie_chart
 from modules.utils import fetch_data
 from datetime import datetime
 import streamlit as st
@@ -61,7 +61,7 @@ def display_expense_data(params, year, month):
 
         # 원형 그래프 생성 및 표시
         data = pd.DataFrame(rank_data)
-        display_pie_chart(data, title="그래프로 보기")
+        display_expense_pie_chart(data, title="지출 차트")
         
         # radio 버튼으로 항목 선택
         st.markdown("#### 자세히 볼 항목을 선택하세요")
@@ -96,9 +96,11 @@ def display_income_data(params, year, month):
         
         # 소득 랭킹 데이터 가져오기
         income_rank_data = fetch_data(GET_INCOME_RANKING, params=params)
-        st.markdown(f"### {year}년 {month}월 소득 순위")
         for item in income_rank_data:
             st.markdown(f"##### • {item['날짜']} [{item['내역']}]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item['금액']:,}원") # &nbsp;은 마크다운 문법에서 공백입니다.
+
+        income_pie_data = pd.DataFrame(income_rank_data)
+        display_income_pie_chart(income_pie_data, title="소득 차트")
 
     except ValueError as e:
         st.error(e)
