@@ -1,29 +1,15 @@
-import streamlit as st
-from modules.api_list import GET_TOTAL_ASSETS, GET_ANNUAL_EXPENSE_RANK, GET_ANNUAL_INCOME_RANK
+from modules.api_list import GET_TOTAL_ASSETS, GET_ANNUAL_EXPENSE_RANK, GET_ANNUAL_INCOME_RANK, GET_MONTHLY_EXPENSE_DATA
 from modules.utils import fetch_data
 from datetime import datetime
-
-def total_asset_expend_income(key):
-    # 데이터를 fetch_data를 통해 가져옴
-    total_assets = fetch_data(GET_TOTAL_ASSETS)
-    # 반환값 예시: [{"총 자산": total_assets, "총 소득": total_income, "총 지출": total_expend}]
-    
-    # 리스트 형태와 해당 key가 있는지 확인
-    if total_assets and isinstance(total_assets, list) and key in total_assets[0]:
-        # 첫 번째 항목에서 key 값에 해당하는 항목 가져오기
-        total_data = total_assets[0].get(key)
-        st.write(f"### {key}: {total_data:,}")  # 세 자리마다 콤마 추가
-    else:
-        st.write(f"{key} 데이터를 불러오지 못했습니다.")
-    # total_asset_expend_income("총 자산")
-    # total_asset_expend_income("총 소득")
-    # total_asset_expend_income("총 지출")
+from modules.ui_elements import display_expense_pie_chart, display_expense_line_graph
+import pandas as pd
+import streamlit as st
 
 def get_annual_data():
     type_input, year_input = st.columns(2)
 
     with type_input:
-        transaction_type = st.radio("거래 유형", ["소득", "지출"], key="transaction_type_radio")
+        transaction_type = st.radio("거래 유형", ["지출", "소득"], key="transaction_type_radio")
 
     with year_input:
         current_year = datetime.now().year
@@ -40,28 +26,41 @@ def get_annual_data():
         elif transaction_type == "소득":
             display_annual_income_data(params, year, transaction_type)
 
-
+# 년간 지출정보 한눈에 보기
 def display_annual_expense_data(params, year, transaction_type):
     # 데이터 가져오기
     annual_expense = fetch_data(GET_ANNUAL_EXPENSE_RANK, params=params)
     
+    total_description, description_chart  = st.columns(2)
     # 데이터가 있는지 확인하고 표시
     if annual_expense:
-        st.write(f"### {year}년 {transaction_type} 합계")
-        
-        # 전체 연도의 description별 합계 표시
         total_yearly_amount = sum(item.get("total_amount", 0) for item in annual_expense)
-        st.write(f"#### 총 {transaction_type} 합계: {total_yearly_amount:,}원")
-        
-        # description별 지출 내역 표시
-        for item in annual_expense:
-            description = item.get("description")
-            total_amount = item.get("total_amount")
-            st.write(f"- {description}: {total_amount:,}원")
+
+        # 내역 별 금액 표
+        with total_description:
+            st.write(f"<span style='color:#C74446; font-size:24px;'> {year}년 {transaction_type} 합계: {total_yearly_amount:,}원</span>",
+                    unsafe_allow_html=True)
+            # description별 지출 내역 표시
+            for item in annual_expense:
+                description = item.get("description")
+                total_amount = item.get("total_amount")
+                st.write(f"- {description}: {total_amount:,}원")
+
+        # 내역 별 지출 파이차트
+        with description_chart:
+            chart_data = pd.DataFrame(annual_expense)
+            display_expense_pie_chart(chart_data, title="지출 차트")
+
+
+        # 월별 지출 
+        monthly_expense_amount = fetch_data(GET_MONTHLY_EXPENSE_DATA, params=params)
+        expense_line_graph_data = pd.DataFrame(monthly_expense_amount)
+        display_expense_line_graph(expense_line_graph_data)
+
     else:
         st.write("데이터를 불러오지 못했습니다.")
 
-
+# 년간 소득정보 한눈에 보기
 def display_annual_income_data(params, year, transaction_type):
     try:
         annual_income_data = fetch_data(GET_ANNUAL_INCOME_RANK, params=params)
@@ -81,3 +80,5 @@ def display_annual_income_data(params, year, transaction_type):
     except ValueError as e:
         # API 요청 실패 시 에러 메시지 표시
         st.error(f"데이터 요청 실패: {e}")
+
+

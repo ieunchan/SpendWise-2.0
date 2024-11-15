@@ -1,4 +1,4 @@
-from modules.total_assets import get_annual_data
+from modules.annual_analsis import get_annual_data
 from modules.data_analysis import data_analysis_page
 from modules.data_entry import data_entry_page
 import streamlit as st
