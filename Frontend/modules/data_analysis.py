@@ -97,7 +97,7 @@ def display_income_data(params, year, month):
         # 소득 랭킹 데이터 가져오기
         income_rank_data = fetch_data(GET_INCOME_RANKING, params=params)
         st.markdown(f"### {year}년 {month}월 소득 순위")
-        for i, item in enumerate(income_rank_data, start=1):
+        for item in income_rank_data:
             st.markdown(f"##### • {item['날짜']} [{item['내역']}]:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item['금액']:,}원") # &nbsp;은 마크다운 문법에서 공백입니다.
 
     except ValueError as e:
