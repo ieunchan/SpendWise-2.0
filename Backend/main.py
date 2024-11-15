@@ -307,11 +307,32 @@ def get_annual_expense_by_description(
         print(f"SQLAlchemy Error: {str(e)}")
         raise HTTPException(status_code=500, detail="연도별 데이터베이스 쿼리 중 오류가 발생했습니다.")
 
-# @app.get("/userdata/income/annual", response_model = List[dict])
-# def get_annual_income(
-#     year: int = Query(..., description="조회할 년도"),
-#     transcation_type: str = Query(..., description="년도 별 소득"),
-#     db: Session = Depends(get_db)
-# ):
-#     try
+
+
+
+# 년간 소득 합계를 반환하는 API
+@app.get("/userdata/income/annual", response_model = List[dict])
+def get_annual_income(
+    year: int = Query(..., description="조회할 년도"),
+    transaction_type: str = Query(..., description="년도 별 소득"),
+    db: Session = Depends(get_db)
+):
+    try:
+        annual_income = {
+            db.query(func.sum(Userdata.amount).label("total_amount"))
+            .filter(Userdata.transaction_type == transaction_type)
+            .filter(func.extract('year', Userdata.date) == year)
+            .scalar()
+        }
+
+        # 소득이 없을 경우 0 반환
+        if not annual_income:
+            return [{"year": year, "total_amount": 0}]
         
+        # 소득 데이터 반환
+        return [{"year": year, "total_amount": annual_income}]
+
+    except SQLAlchemyError as e:
+        # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
+        print(f"SQLAlchemy Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="연도별 데이터베이스 쿼리 중 오류가 발생했습니다.")
