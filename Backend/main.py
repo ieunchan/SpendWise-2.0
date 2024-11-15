@@ -239,34 +239,7 @@ def income_ranking(
     ]
     return income_rank_data
 
-# 총 자산, 총 소득, 총 지출을 표시하는 API
-# @app.get("/userdata/total_asset/", response_model=List[dict])
-# def get_total_assets(db: Session = Depends(get_db)):
-#     def get_total_by_type(transaction_type: str, year: int):
-#         try:
-#             # 트랜잭션 유형에 따라 합계를 계산
-#             result = (
-#                 db.query(func.sum(Userdata.amount).label("total_amount"))
-#                 .filter(Userdata.transaction_type == transaction_type)
-#                 .filter(func.extract('year', Userdata.date) == year)
-#                 .scalar()  # 합계 값을 직접 가져오기
-#             )
-#             return result or 0  # None일 경우 0 반환
-#         except SQLAlchemyError as e:
-#             print(f"SQLAlchemy Error: {str(e)}")
-#             raise HTTPException(
-#                 status_code=500,
-#                 detail=f"{transaction_type} 총액 데이터베이스 쿼리 중 오류가 발생했습니다."
-#             )
 
-#     # 소득과 지출의 합계 계산
-#     total_income = get_total_by_type("소득")
-#     total_expend = get_total_by_type("지출")
-
-#     # 총 자산 계산
-#     total_assets = total_income - total_expend
-
-#     return [{"총 자산": total_assets, "총 소득": total_income, "총 지출": total_expend}]
 
 # 년간 지출 합계를 반환하는 API
 @app.get("/userdata/expense/annual", response_model=List[ExpenseSummary])
@@ -309,7 +282,6 @@ def get_annual_expense_by_description(
 
 
 
-
 # 년간 소득 합계를 반환하는 API
 @app.get("/userdata/income/annual", response_model = List[dict])
 def get_annual_income(
@@ -336,3 +308,34 @@ def get_annual_income(
         # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
         print(f"SQLAlchemy Error: {str(e)}")
         raise HTTPException(status_code=500, detail="연도별 데이터베이스 쿼리 중 오류가 발생했습니다.")
+    
+
+@app.get("/userdata/expense/monthly", response_model=List[dict])
+def get_annual_monthly_expense_total(
+    year: int = Query(..., description="조회할 년도"),
+    db: Session = Depends(get_db)
+):
+    try:
+        month_total = []
+        for month in range(1,13):
+            start_of_month, end_of_month = get_month_range(year, month)
+            monthly_total = (
+                db.query(func.sum(Userdata.amount).label('total_amount'))
+                .filter(Userdata.transaction_type == "지출")
+                .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+                .scalar()
+            )
+            # 해당 월의 지출 합계가 없을 경우 0으로 설정
+            if monthly_total is None:
+                monthly_total = 0
+            month_total.append({
+                "year": year,
+                "month": month,
+                "total_amount": monthly_total
+            })
+        return month_total
+
+    except SQLAlchemyError as e:
+        # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
+        print(f"SQLAlchemy Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="월별 지출 합계 계산 중 오류가 발생했습니다.")
