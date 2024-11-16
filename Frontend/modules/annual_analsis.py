@@ -65,14 +65,21 @@ def display_annual_income_data(params, year, transaction_type):
     try:
         annual_income_data = fetch_data(GET_ANNUAL_INCOME_RANK, params=params)
 
+        total_income_amount, income_description_chart = st.columns(2)
+
         if annual_income_data:
-            st.write(f"### {year}년 {transaction_type} 합계")
-            
-            for amount in annual_income_data:
-                year = amount.get("year")
-                total_amount = amount.get("total_amount")[0] # 리스트 형태에서 3자리 마다 소수점을 붙히기 어려워서 리스트의 0번 값을 빼와서 숫자로 바꿈
-                st.markdown(f"### {total_amount:,} 원")
-        
+
+            total_yearly_amount = sum(item.get("total_amount", 0) for item in annual_income_data)
+
+            with total_income_amount:
+                st.write(f"<span style='color:#1E90FF; font-size:24px;'>{year}년 {transaction_type} 합계 : {total_yearly_amount:,} 원</span>",
+                unsafe_allow_html=True)
+
+                for item in annual_income_data:
+                    description = item.get("description")
+                    total_amount = item.get("total_amount")
+                    st.write(f"- {description}: {total_amount:,}원")
+
         else:
             st.write("데이터 로드 중 에러가 발생했습니다.")
 
