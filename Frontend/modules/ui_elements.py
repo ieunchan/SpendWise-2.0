@@ -31,6 +31,7 @@ def display_income_pie_chart(data, title="소득 그래프"):
     fig.update_traces(
         text=[f"{desc}: {amt:,}원" for desc, amt in zip(data["내역"], data["금액"])],
         textinfo="text",
+        textposition="auto",
         hovertemplate="%{label}: %{value:,}원<extra></extra>",
         marker=dict(colors=custom_colors),
         pull=[0.02] * len(data)  # 조각 간격 조정

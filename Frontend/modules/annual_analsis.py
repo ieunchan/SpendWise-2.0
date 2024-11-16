@@ -1,7 +1,7 @@
-from modules.api_list import GET_TOTAL_ASSETS, GET_ANNUAL_EXPENSE_RANK, GET_ANNUAL_INCOME_RANK, GET_MONTHLY_EXPENSE_DATA
+from modules.api_list import GET_TOTAL_ASSETS, GET_ANNUAL_EXPENSE_RANK, GET_ANNUAL_INCOME_RANK, GET_MONTHLY_EXPENSE_DATA,GET_MONTHLY_INCOME_DATA
 from modules.utils import fetch_data
 from datetime import datetime
-from modules.ui_elements import display_expense_pie_chart, display_expense_line_graph
+from modules.ui_elements import display_expense_pie_chart, display_expense_line_graph, display_income_pie_chart
 import pandas as pd
 import streamlit as st
 
@@ -31,7 +31,7 @@ def display_annual_expense_data(params, year, transaction_type):
     # 데이터 가져오기
     annual_expense = fetch_data(GET_ANNUAL_EXPENSE_RANK, params=params)
     
-    total_description, description_chart  = st.columns(2)
+    total_description, description_chart  = st.columns([1, 2])
     # 데이터가 있는지 확인하고 표시
     if annual_expense:
         total_yearly_amount = sum(item.get("total_amount", 0) for item in annual_expense)
@@ -65,8 +65,7 @@ def display_annual_income_data(params, year, transaction_type):
     try:
         annual_income_data = fetch_data(GET_ANNUAL_INCOME_RANK, params=params)
 
-        total_income_amount, income_description_chart = st.columns(2)
-
+        total_income_amount, income_description_chart = st.columns([1, 2])  # 비율: 1:2
         if annual_income_data:
 
             total_yearly_amount = sum(item.get("total_amount", 0) for item in annual_income_data)
@@ -79,6 +78,14 @@ def display_annual_income_data(params, year, transaction_type):
                     description = item.get("description")
                     total_amount = item.get("total_amount")
                     st.write(f"- {description}: {total_amount:,}원")
+
+            with income_description_chart:
+                # 데이터프레임 열 이름을 변경
+                chart_data = pd.DataFrame(annual_income_data).rename(
+                    columns={"description": "내역", "total_amount": "금액"})
+                display_income_pie_chart(chart_data, title="내역 별 차트")
+
+            # 월별 차트
 
         else:
             st.write("데이터 로드 중 에러가 발생했습니다.")
