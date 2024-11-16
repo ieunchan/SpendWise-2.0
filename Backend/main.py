@@ -283,27 +283,38 @@ def get_annual_expense_by_description(
 
 
 # 년간 소득 합계를 반환하는 API
-@app.get("/userdata/income/annual", response_model = List[dict])
+@app.get("/userdata/income/annual", response_model = List[ExpenseSummary])
 def get_annual_income(
     year: int = Query(..., description="조회할 년도"),
     transaction_type: str = Query(..., description="년도 별 소득"),
     db: Session = Depends(get_db)
 ):
     try:
-        annual_income = {
-            db.query(func.sum(Userdata.amount).label("total_amount"))
-            .filter(Userdata.transaction_type == transaction_type)
-            .filter(func.extract('year', Userdata.date) == year)
-            .scalar()
-        }
+        # 연도별 소득 또는 지출 합계를 description별로 합산하여 조회
+        annual_expense = (
+            db.query(Userdata.description, func.sum(Userdata.amount).label("total_amount"))
+            .filter(
+                and_(
+                    Userdata.transaction_type == transaction_type,  # 거래 유형 필터
+                    func.extract('year', Userdata.date) == year  # 연도 필터링
+                )
+            )
+            .group_by(Userdata.description)
+            .order_by(func.sum(Userdata.amount).desc())  # 금액 순으로 정렬
+            .all()
+        )
 
-        # 소득이 없을 경우 0 반환
-        if not annual_income:
-            return [{"year": year, "total_amount": 0}]
+        # 결과가 비어 있을 경우 기본 값 반환
+        if not annual_expense:
+            return [{"description": "데이터 없음", "total_amount": 0}]
         
-        # 소득 데이터 반환
-        return [{"year": year, "total_amount": annual_income}]
-
+        # Pydantic 모델 형식에 맞게 데이터 변환
+        annual_expense_data = [
+            ExpenseSummary(description=item[0], total_amount=item[1])
+            for item in annual_expense
+        ]
+        
+        return annual_expense_data
     except SQLAlchemyError as e:
         # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
         print(f"SQLAlchemy Error: {str(e)}")
