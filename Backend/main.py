@@ -362,12 +362,12 @@ def get_annual_monthly_income_total(
         for month in range(1,13):
             start_of_month, end_of_month = get_month_range(year, month)
             monthly_total = (
-                db.query(func.sum(Userdata.amount)).label("total_amount")
+                db.query(func.sum(Userdata.amount).label("total_amount"))
                 .filter(Userdata.transaction_type == "소득")
                 .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
                 .scalar()
             )
-            if not monthly_total:
+            if monthly_total is None:
                 monthly_total = 0
             
             month_total.append({
@@ -375,7 +375,7 @@ def get_annual_monthly_income_total(
                 "month": month,
                 "total_amount": monthly_total
             })
-        return monthly_total
+        return month_total
     
     except SQLAlchemyError as e:
         # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
