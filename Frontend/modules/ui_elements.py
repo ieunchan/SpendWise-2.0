@@ -53,10 +53,12 @@ def display_expense_line_graph(data, title="월별 지출 총액"):
     fig.add_trace(go.Scatter(
         x=df["month"],
         y=df["total_amount"],
-        mode="lines+markers",
+        mode="lines+markers+text",
         name="월별 지출 합계",
-        line=dict(color="indianred", width=2),
-        marker=dict(color="indianred", size=10),
+        line=dict(color="indianred", width=5),
+        marker=dict(color="indianred", size=15),
+        text=[f"{v:,}원" for v in df["total_amount"]],  # 점 위에 표시할 텍스트
+        textposition="top center",  # 텍스트 위치 (점 위 중앙)
         hovertemplate='%{x}월: %{y:,}원'  # 툴팁 포맷 설정
     ))
 
@@ -65,6 +67,43 @@ def display_expense_line_graph(data, title="월별 지출 총액"):
         title=title,
         xaxis_title="월",
         yaxis_title="지출 총액 (원)",
+        xaxis=dict(tickmode="linear", dtick=1),  # 월 단위 눈금
+        yaxis=dict(range=[0, max_y], tickformat=",.0f"),  # y축을 쉼표 있는 원 단위로 설정
+        template="plotly_white"
+    )
+
+    # Streamlit을 사용해 그래프 표시
+    st.plotly_chart(fig)
+
+
+def display_income_line_graph(data, title="월별 소득 총액"):
+    """월별 소득 꺾은선 그래프 표시"""
+    
+    # 데이터를 DataFrame으로 변환 (data는 리스트 형식으로 가정)
+    df = pd.DataFrame(data)
+    
+    # y축 최대값 설정 (최대값의 약 1.2배로 여유를 둠)
+    max_y = int(df["total_amount"].max() * 1.5)
+    
+    # 꺾은선 그래프 생성
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df["month"],
+        y=df["total_amount"],
+        mode="lines+markers+text",
+        name="월별 소득 합계",
+        line=dict(color="indianred", width=5),
+        marker=dict(color="indianred", size=15),
+        text=[f"{v:,}원" for v in df["total_amount"]],  # 점 위에 표시할 텍스트
+        textposition="top center",  # 텍스트 위치 (점 위 중앙)
+        hovertemplate='%{x}월: %{y:,}원'  # 툴팁 포맷 설정
+    ))
+
+    # 그래프 레이아웃 설정
+    fig.update_layout(
+        title=title,
+        xaxis_title="월",
+        yaxis_title="소득 총액 (원)",
         xaxis=dict(tickmode="linear", dtick=1),  # 월 단위 눈금
         yaxis=dict(range=[0, max_y], tickformat=",.0f"),  # y축을 쉼표 있는 원 단위로 설정
         template="plotly_white"

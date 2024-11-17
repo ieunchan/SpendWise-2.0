@@ -1,7 +1,7 @@
 from modules.api_list import GET_TOTAL_ASSETS, GET_ANNUAL_EXPENSE_RANK, GET_ANNUAL_INCOME_RANK, GET_MONTHLY_EXPENSE_DATA,GET_MONTHLY_INCOME_DATA
 from modules.utils import fetch_data
 from datetime import datetime
-from modules.ui_elements import display_expense_pie_chart, display_expense_line_graph, display_income_pie_chart
+from modules.ui_elements import display_expense_pie_chart, display_expense_line_graph, display_income_pie_chart,display_income_line_graph
 import pandas as pd
 import streamlit as st
 
@@ -85,7 +85,9 @@ def display_annual_income_data(params, year, transaction_type):
                     columns={"description": "내역", "total_amount": "금액"})
                 display_income_pie_chart(chart_data, title="내역 별 차트")
 
-            # 월별 차트
+            # 월별 그래프
+            monthly_income_data = fetch_data(GET_MONTHLY_INCOME_DATA, params=params)
+            display_income_line_graph(monthly_income_data)
 
         else:
             st.write("데이터 로드 중 에러가 발생했습니다.")
