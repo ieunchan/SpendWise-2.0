@@ -24,7 +24,7 @@
 ![spendwise 데이터 입력](https://github.com/user-attachments/assets/b737f381-82a0-43ee-bfd6-2b608b38fb16)
 <hr>
 
-  + 사용자가 수입/지출 데이터를 입력하면 DB에 저장이 되야한다.
+  + 사용자가 수입/지출 데이터를 입력하면 DB에 저장이 되어야한다.
     
       + 유저 데이터:
           ```
