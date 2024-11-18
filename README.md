@@ -54,5 +54,23 @@
 + 선택한 년도의 내역 별 지출 합계 확인 기능 => 파이차트
 + 선택한 년도의 1 ~ 12월의 지출 금액 꺾인 선 그래프로 시각화
 
+# 기술 스택 (Tech Stack)
 
+## ⚙️ 백엔드 (Backend)
+<p align="left">
+  <img src="https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png" alt="FastAPI" height="50">
+  <img src="https://raw.githubusercontent.com/encode/uvicorn/master/docs/uvicorn.png" alt="Uvicorn" height="50">
+  <img src="https://www.sqlite.org/images/sqlite370_banner.gif" alt="SQLite" height="50">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/SQLAlchemy.svg/1200px-SQLAlchemy.svg.png" alt="SQLAlchemy" height="50">
+  <img src="https://www.python.org/static/community_logos/python-logo-master-v3-TM.png" alt="Python" height="50">
+</p>
+
+---
+
+## 🖥️ 프론트엔드 (Frontend)
+<p align="left">
+  <img src="https://streamlit.io/images/brand/streamlit-mark-color.png" alt="Streamlit" height="50">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Plotly-logo.png/1200px-Plotly-logo.png" alt="Plotly" height="50">
+  <img src="https://pandas.pydata.org/static/img/pandas_white.svg" alt="Pandas" height="50">
+</p>
 
