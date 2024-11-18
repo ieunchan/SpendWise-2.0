@@ -71,6 +71,6 @@
 <p align="left">
   <img src="https://streamlit.io/images/brand/streamlit-mark-color.png" alt="Streamlit" height="50">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Plotly-logo.png/1200px-Plotly-logo.png" alt="Plotly" height="50">
-  <img src="https://pandas.pydata.org/static/img/pandas_white.svg" alt="Pandas" height="100">
+  <img src="https://pandas.pydata.org/static/img/pandas.svg" alt="Pandas 로고" width="200">
 </p>
 
