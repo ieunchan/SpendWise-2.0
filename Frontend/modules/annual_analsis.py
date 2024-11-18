@@ -1,9 +1,9 @@
-from modules.api_list import GET_TOTAL_ASSETS, GET_ANNUAL_EXPENSE_RANK, GET_ANNUAL_INCOME_RANK, GET_MONTHLY_EXPENSE_DATA,GET_MONTHLY_INCOME_DATA
+from modules.ui_elements import display_expense_pie_chart, display_expense_line_graph, display_income_pie_chart,display_income_line_graph
+from modules.api_list import GET_ANNUAL_EXPENSE_RANK, GET_ANNUAL_INCOME_RANK, GET_MONTHLY_EXPENSE_DATA,GET_MONTHLY_INCOME_DATA
 from modules.utils import fetch_data
 from datetime import datetime
-from modules.ui_elements import display_expense_pie_chart, display_expense_line_graph, display_income_pie_chart,display_income_line_graph
-import pandas as pd
 import streamlit as st
+import pandas as pd
 
 def get_annual_data():
     type_input, year_input = st.columns(2)

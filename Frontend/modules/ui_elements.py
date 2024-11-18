@@ -1,6 +1,6 @@
+import plotly.graph_objects as go
 import plotly.express as px
 import streamlit as st
-import plotly.graph_objects as go
 import pandas as pd
 
 def display_selectbox(options, label="선택"):
@@ -111,3 +111,4 @@ def display_income_line_graph(data, title="월별 소득 총액"):
 
     # Streamlit을 사용해 그래프 표시
     st.plotly_chart(fig)
+
