@@ -54,6 +54,13 @@
 + 선택한 년도의 내역 별 지출 합계 확인 기능 => 파이차트
 + 선택한 년도의 1 ~ 12월의 지출 금액 꺾인 선 그래프로 시각화
 
+
+## * 버전 기록:
+
++ 2.1: 총 자산 항상 화면에 표시
++ 2.1.1(예정): 데이터 입력 시 금액이 줄어들어 저장되는 에러 해결(예정)
++ 2.2(예정): 저장된 데이터 수정, 삭제 기능(예정)
+
 # 기술 스택 (Tech Stack)
 
 ## ⚙️ 백엔드 (Backend)
@@ -61,7 +68,7 @@
   <img src="https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png" alt="FastAPI" height="50">
   <img src="https://raw.githubusercontent.com/encode/uvicorn/master/docs/uvicorn.png" alt="Uvicorn" height="50">
   <img src="https://www.sqlite.org/images/sqlite370_banner.gif" alt="SQLite" height="50">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/SQLAlchemy.svg/1200px-SQLAlchemy.svg.png" alt="SQLAlchemy" height="50">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMoFxet9K9uMBhYpQyE_My9--989HZ4vCMSA&s" alt="SQLAlchemy" height="50">
   <img src="https://www.python.org/static/community_logos/python-logo-master-v3-TM.png" alt="Python" height="50">
 </p>
 
