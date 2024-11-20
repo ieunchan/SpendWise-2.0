@@ -381,3 +381,33 @@ def get_annual_monthly_income_total(
         # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
         print(f"SQLAlchemy Error: {str(e)}")
         raise HTTPException(status_code=500, detail="월별 소득 합계 계산 중 오류가 발생했습니다.")
+    
+@app.get("/userdata/total_asset/", response_model=List[dict])
+def show_total_asset(
+        db: Session = Depends(get_db)
+):
+    try:
+        total_asset = []
+        total_income = (
+            db.query(func.sum(Userdata.amount).label("total_income"))
+            .filter(Userdata.transaction_type == "소득")
+            .scalar()
+        )
+        if total_income is None:
+            total_income = 0
+        
+        total_expense = (
+            db.query(func.sum(Userdata.amount).label("total_expense"))
+            .filter(Userdata.transaction_type == '지출')
+            .scalar()
+        )
+        if total_expense is None:
+            total_expense = 0
+
+        total_asset.append({'total_asset': total_income - total_expense})
+        return total_asset
+    
+    except SQLAlchemyError as e:
+        # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
+        print(f"SQLAlchemy Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="총 자산 합계 계산 중 오류가 발생했습니다.")
