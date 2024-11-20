@@ -31,14 +31,14 @@ def display_annual_expense_data(params, year, transaction_type):
     # 데이터 가져오기
     annual_expense = fetch_data(GET_ANNUAL_EXPENSE_RANK, params=params)
     
-    total_description, description_chart  = st.columns([1, 2])
+    total_description, description_chart  = st.columns([1, 3])
     # 데이터가 있는지 확인하고 표시
     if annual_expense:
         total_yearly_amount = sum(item.get("total_amount", 0) for item in annual_expense)
 
         # 내역 별 금액 표
         with total_description:
-            st.write(f"<span style='color:#C74446; font-size:24px;'> {year}년 {transaction_type} 합계: {total_yearly_amount:,}원</span>",
+            st.write(f"<span style='color:#C74446; font-size:24px;'> {year}년 {transaction_type}: {total_yearly_amount:,}원</span>",
                     unsafe_allow_html=True)
             # description별 지출 내역 표시
             for item in annual_expense:

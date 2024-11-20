@@ -22,7 +22,7 @@ def data_entry_page():
 
     # 나머지 입력 필드
     amount = st.number_input("금액", min_value=0)
-    st.write(f"입력한 금액: {amount:,.0f} 원")
+    st.write(f"입력한 금액: {amount:,} 원")
     date_input = st.date_input("날짜", value=date.today())
     
     # 제출 버튼
