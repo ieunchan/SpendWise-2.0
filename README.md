@@ -54,23 +54,35 @@
 + 선택한 년도의 내역 별 지출 합계 확인 기능 => 파이차트
 + 선택한 년도의 1 ~ 12월의 지출 금액 꺾인 선 그래프로 시각화
 
+
+## * 버전 기록:
+
++ 2.1: 총 자산 항상 화면에 표시 => 11/20 완료.
+  + 사용자의 총 자산이 화면에 표시됨 => 완료
+  + 총 자산은 (총 소득 - 총 지출)로 산출되어 표시됨. => 완료
++ 2.1.1: 도커 컴포즈
+  +	프론트엔드와 백엔드의 도커 컴포즈 통합: Docker Compose를 사용해 Streamlit 프론트엔드와 FastAPI 백엔드를 동시에 실행하도록 구성.
++ 2.1.2(예정): 데이터 입력 시 금액이 줄어들어 저장되는 에러 해결(예정)
++ 2.2(예정): 저장된 데이터 수정, 삭제 기능(예정)
+
 # 기술 스택 (Tech Stack)
 
 ## ⚙️ 백엔드 (Backend)
 <p align="left">
-  <img src="https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png" alt="FastAPI" height="50">
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white"> 
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=SQLite&logoColor=white">
+  <img src="https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=SQLAlchemy&logoColor=white">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white">
+  <img src="https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=Pydantic&logoColor=white">
   <img src="https://raw.githubusercontent.com/encode/uvicorn/master/docs/uvicorn.png" alt="Uvicorn" height="50">
-  <img src="https://www.sqlite.org/images/sqlite370_banner.gif" alt="SQLite" height="50">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/SQLAlchemy.svg/1200px-SQLAlchemy.svg.png" alt="SQLAlchemy" height="50">
-  <img src="https://www.python.org/static/community_logos/python-logo-master-v3-TM.png" alt="Python" height="50">
 </p>
 
 ---
 
 ## 🖥️ 프론트엔드 (Frontend)
 <p align="left">
-  <img src="https://streamlit.io/images/brand/streamlit-mark-color.png" alt="Streamlit" height="50">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Plotly-logo.png/1200px-Plotly-logo.png" alt="Plotly" height="50">
-  <img src="https://pandas.pydata.org/static/img/pandas.svg" alt="Pandas 로고" width="200">
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white">
+  <img src="https://img.shields.io/badge/Plotly-3F4F75?style=for-the-badge&logo=Plotly&logoColor=white">
+  <img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=Pandas&logoColor=white">
 </p>
 
