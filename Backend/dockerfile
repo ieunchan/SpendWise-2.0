@@ -1,0 +1,15 @@
+# Python 3.10 이미지를 사용
+FROM python:3.10
+
+# 컨테이너 내 작업 디렉터리 설정
+WORKDIR /app
+
+# requirements.txt 복사 및 필요한 라이브러리 설치
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 애플리케이션 코드 복사
+COPY . .
+
+# FastAPI 서버 실행 명령어
+CMD ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
