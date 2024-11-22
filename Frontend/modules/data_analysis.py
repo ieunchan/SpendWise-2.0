@@ -66,7 +66,7 @@ def display_expense_data(params, year, month):
         # radio 버튼으로 항목 선택
         st.markdown("#### 자세히 볼 항목을 선택하세요")
         selected_category = st.radio(
-            label="",
+            label="상세내역",
             options=data["description"].unique(),
             index=0  # 기본값으로 첫 번째 항목을 선택
         )

@@ -18,7 +18,7 @@ def data_entry_page():
         description_detail = st.text_input("상세 내역 설명을 입력하세요")
     else:
         description = st.text_input("소득 내역")
-        description_detail = None
+        description_detail = description
 
     # 나머지 입력 필드
     amount = st.number_input("금액", min_value=0)
