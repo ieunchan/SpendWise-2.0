@@ -65,6 +65,9 @@
   +	도커 실행 명령어:   ```docker-compose up --build```
 + 2.2(예정): 저장된 데이터 수정, 삭제 기능(예정)
    + 데이터 수정 기능 => 11/22일 완료
+      + ![수정 기능 추가](https://github.com/user-attachments/assets/15cd27cb-8b9e-479c-b473-c6a892e37e1f)
+
+     
    + 데이터 삭제 기능(예정)
 
 # 기술 스택 (Tech Stack)
