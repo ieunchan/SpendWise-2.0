@@ -22,6 +22,7 @@ tab1, tab2, tab3, tab4 = st.tabs(["데이터 입력", "월간 데이터 조회",
 with tab1:
     data_entry_page()
 
+
 with tab2:
     data_analysis_page()
 
