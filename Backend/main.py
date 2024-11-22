@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, Date, func
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
-from fastapi import FastAPI, Query, Depends,HTTPException
+from fastapi import FastAPI, Query, Depends,HTTPException, Body
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, List
 from decouple import AutoConfig
@@ -84,6 +84,32 @@ def create_userdata(userdata: UserdataCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_userdata)
     return db_userdata
+
+# 데이터 수정 API
+@app.put("/userdata/update/", response_model=UserdataResponse)
+def update_userdata(
+    id: int = Query(..., description="조회할 id"),
+    userdata: UserdataCreate = Body(...),  # 요청 본문으로 처리 
+    db: Session = Depends(get_db)
+):
+    db_userdata = db.query(Userdata).filter(Userdata.id == id).first()
+
+    if not db_userdata:
+        raise HTTPException(status_code=404, detail="해당 데이터가 존재하지 않습니다.")
+    
+    # 데이터 업데이트
+    db_userdata.transaction_type = userdata.transaction_type
+    db_userdata.description = userdata.description
+    db_userdata.description_detail = userdata.description_detail
+    db_userdata.amount = userdata.amount
+    db_userdata.date = userdata.date
+
+    # 변경 사항 커밋
+    db.commit()
+    db.refresh(db_userdata)  # 업데이트된 데이터를 새로고침
+
+    return db_userdata
+
 
 # 지출 데이터 조회 API (총 금액만 반환)
 @app.get("/userdata/expense/", response_model=List[dict])
@@ -204,7 +230,7 @@ def get_expense_details(
     ]
     return details
 
-
+# 선택한 년도, 월의 순위 데이터를 반환하는 API
 @app.get("/userdata/income/ranking/", response_model=List[dict])
 def income_ranking(
     year: int = Query(..., description="조회할 년도"),
@@ -410,4 +436,29 @@ def show_total_asset(
     except SQLAlchemyError as e:
         # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
         print(f"SQLAlchemy Error: {str(e)}")
-        raise HTTPException(status_code=500, detail="총 자산 합계 계산 중 오류가 발생했습니다.")
+        raise HTTPException(status_code=500, detail="총 자산 합계 계산 중 오류가 발생했습니다.")    
+
+
+@app.get("/userdata/all_data/", response_model=List[UserdataResponse])
+def income_expense_all_data(
+    year: int = Query(..., description="조회할 년도"),
+    month: int = Query(..., description="조회할 월"),
+    transaction_type: str = Query(..., description="거래내역"),
+    db: Session = Depends(get_db)
+):
+    try:
+        star_of_month, end_of_month = get_month_range(year, month)
+        response_data = (
+            db.query(Userdata)
+            .filter(Userdata.transaction_type == transaction_type)
+            .filter(Userdata.date >= star_of_month, Userdata.date < end_of_month)
+            .order_by(Userdata.id.desc())
+        )
+        if response_data is None:
+            response_data = []
+        return response_data
+
+    except SQLAlchemyError as e:
+    # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
+        print(f"SQLAlchemy Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="소득 랭킹 데이터베이스 쿼리 중 오류가 발생했습니다.")
