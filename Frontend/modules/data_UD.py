@@ -1,4 +1,4 @@
-from modules.api_list import UPDATE_USERDATA, GET_ALL_DATA
+from modules.api_list import UPDATE_USERDATA, GET_ALL_DATA, DELETE_DATA
 from datetime import datetime
 from modules.utils import fetch_data
 import streamlit as st
@@ -50,7 +50,7 @@ def show_all_data_with_edit(params, transaction_type):
 
         # 데이터 표시 및 수정 UI 생성
         for idx, row in df.iterrows():
-            with st.expander(f"날짜: {row['date']} -- 거래 유형: {row['description']} -- 상세내역: {row['description_detail']} -- 금액: {row['amount']:,}"):
+            with st.expander(f"{row['date']} -- {row['description']} -- [{row['description_detail']}] -- {row['amount']:,}원"):
                 with st.form(key=f"form_{row['id']}"):
                     # 입력 필드
                     description = st.text_input("내역(식비, 교통비, 쇼핑, 기타)", value=row["description"], key=f"description_{row['id']}")
@@ -62,6 +62,7 @@ def show_all_data_with_edit(params, transaction_type):
 
                     # 저장 버튼
                     submit_button = st.form_submit_button(label="저장")
+                    delete_button = st.form_submit_button(label="데이터 제거")
                     if submit_button:
                         # 수정 데이터 생성
                         updated_data = {
@@ -80,5 +81,11 @@ def show_all_data_with_edit(params, transaction_type):
                             st.success("수정이 완료되었습니다.")
                         else:
                             st.error(f"수정 실패: {response.status_code}")
+                    elif delete_button:
+                        delete_response = requests.delete(DELETE_DATA, params={"id": row["id"]})
+                        if delete_response.status_code == 200:
+                            st.success("데이터가 제거되었습니다.")
+                        else:
+                            st.error(f"제거 실패: {delete_response.status_code}")
     else:
         st.warning("조회된 데이터가 없습니다.")
