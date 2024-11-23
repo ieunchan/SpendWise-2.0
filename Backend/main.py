@@ -462,3 +462,23 @@ def income_expense_all_data(
     # SQLAlchemy 오류 발생 시 예외 처리 및 로그 출력
         print(f"SQLAlchemy Error: {str(e)}")
         raise HTTPException(status_code=500, detail="소득 랭킹 데이터베이스 쿼리 중 오류가 발생했습니다.")
+    
+
+@app.delete("/userdata/delete/")
+def delete_data(
+    id: int = Query(..., description="삭제할 데이터의 id"),
+    db: Session = Depends(get_db)
+):
+
+    db_userdata = db.query(Userdata).filter(Userdata.id == id).first()
+
+    if not db_userdata:
+        raise HTTPException(status_code=404, detail="데이터가 존재하지 않습니다.")
+    
+    try:
+        db.delete(db_userdata)
+        db.commit()
+        return {'message': '데이터가 성공적으로 제거되었습니다.'}
+    except Exception as e:
+        db.rollback()  # 트랜잭션 롤백
+        raise HTTPException(status_code=500, detail=f"삭제 중 오류가 발생했습니다: {str(e)}")
