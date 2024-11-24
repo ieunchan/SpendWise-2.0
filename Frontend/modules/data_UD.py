@@ -28,11 +28,16 @@ def update_delete_userdata():
         current_month = datetime.now().month
         month = st.selectbox("월", list(range(1, 13)), index=current_month - 1, key="UD month input")
 
-    # 데이터 조회 버튼
-    if st.button("데이터 조회", key="data for update/delete"):
-        st.session_state.update_data_fetched = True
-        st.session_state.update_params = {"year": year, "month": month, "transaction_type": transaction_type}
-        st.session_state.update_show_data = True  # 데이터 표시 플래그
+    # 버튼 섹션
+    data_view, reset = st.columns(2)
+    with data_view:
+        if st.button("데이터 조회", key="data for update/delete", use_container_width=True):
+            st.session_state.update_data_fetched = True
+            st.session_state.update_params = {"year": year, "month": month, "transaction_type": transaction_type}
+            st.session_state.update_show_data = True  # 데이터 표시 플래그
+    with reset:
+        if st.button("새로고침", key="button for rerun", use_container_width=True, type='primary'):
+            st.rerun()
 
     # 데이터 조회 및 편집 UI 표시
     if st.session_state.update_data_fetched:
@@ -61,31 +66,31 @@ def show_all_data_with_edit(params, transaction_type):
                     date = st.date_input("날짜", value=pd.to_datetime(row["date"]).date(), key=f"date_{row['id']}")
 
                     # 저장 버튼
-                    submit_button = st.form_submit_button(label="저장")
-                    delete_button = st.form_submit_button(label="데이터 제거")
-                    if submit_button:
-                        # 수정 데이터 생성
-                        updated_data = {
-                            "transaction_type": transaction_type,
-                            "description": description,
-                            "description_detail": description_detail,
-                            "amount": amount,
-                            "date": str(date),
-                        }
+                    submit_button, delete_button = st.columns(2)
+                # st.form_submit_button(label="저장")
+                    with submit_button:
+                        if st.form_submit_button(label="데이터 수정", use_container_width=True, type="secondary"):
+                            # 수정 데이터 생성
+                            updated_data = {
+                                "transaction_type": transaction_type,
+                                "description": description,
+                                "description_detail": description_detail,
+                                "amount": amount,
+                                "date": str(date),
+                            }
 
-                        # API 호출
-                        response = requests.put(
-                            UPDATE_USERDATA, params={"id": row["id"]}, json=updated_data
-                        )
-                        if response.status_code == 200:
-                            st.success("수정이 완료되었습니다.")
-                        else:
-                            st.error(f"수정 실패: {response.status_code}")
-                    elif delete_button:
-                        delete_response = requests.delete(DELETE_DATA, params={"id": row["id"]})
-                        if delete_response.status_code == 200:
-                            st.success("데이터가 제거되었습니다.")
-                        else:
-                            st.error(f"제거 실패: {delete_response.status_code}")
-    else:
-        st.warning("조회된 데이터가 없습니다.")
+                            # API 호출
+                            response = requests.put(
+                                UPDATE_USERDATA, params={"id": row["id"]}, json=updated_data
+                            )
+                            if response.status_code == 200:
+                                st.success("수정이 완료되었습니다.")
+                            else:
+                                st.error(f"수정 실패: {response.status_code}")
+                    with delete_button:
+                        if st.form_submit_button(label="데이터 삭제", use_container_width=True, type="primary"):
+                            delete_response = requests.delete(DELETE_DATA, params={"id": row["id"]})
+                            if delete_response.status_code == 200:
+                                st.success("데이터가 제거되었습니다.")
+                            else:
+                                st.error(f"제거 실패: {delete_response.status_code}")

@@ -25,8 +25,6 @@ def data_entry_page():
     st.write(f"입력한 금액: {amount:,} 원")
     date_input = st.date_input("날짜", value=date.today())
     
-    # 제출 버튼
-    submit_button = st.button("제출", use_container_width=True, type="primary")
 
     # 모든 필드가 입력되었는지 확인
     is_valid = (
@@ -38,23 +36,29 @@ def data_entry_page():
     )
 
     # 모든 필드가 채워져야만 데이터 전송
-    if submit_button:
-        if is_valid:
-            userdata = {
-                "transaction_type": transaction_type,
-                "description": description,
-                "description_detail": description_detail,
-                "amount": amount,
-                "date": str(date_input)
-            }
+    submit_button, reset_button = st.columns(2)
 
-            # 백엔드로 데이터 전송
-            response = requests.post(DATA_CREATE, json=userdata)
-            if response.status_code == 200:
-                st.success("데이터가 성공적으로 저장되었습니다.")
-                st.json(response.json())
+    with submit_button:
+        if st.button("데이터 전송", key='데이터 입력 탭 데이터 제출 버튼', use_container_width=True, type='primary'):
+            if is_valid:
+                userdata = {
+                    "transaction_type": transaction_type,
+                    "description": description,
+                    "description_detail": description_detail,
+                    "amount": amount,
+                    "date": str(date_input)
+                }
+
+                # 백엔드로 데이터 전송
+                response = requests.post(DATA_CREATE, json=userdata)
+                if response.status_code == 200:
+                    st.success("데이터가 성공적으로 저장되었습니다.")
+                    st.json(response.json())
+                else:
+                    st.error(f"오류 발생: {response.status_code}")
+                    st.write(response.text)
             else:
-                st.error(f"오류 발생: {response.status_code}")
-                st.write(response.text)
-        else:
-            st.error("모든 필드가 올바르게 입력되어야 제출할 수 있습니다.")
+                st.error("모든 필드가 올바르게 입력되어야 제출할 수 있습니다.")
+    with reset_button:
+        if st.button('초기화', key="데이터 입력탭 초기화 버튼", use_container_width=True, type='secondary'):
+            st.rerun()
