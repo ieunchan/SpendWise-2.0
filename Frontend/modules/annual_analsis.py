@@ -9,7 +9,7 @@ def get_annual_data():
     type_input, year_input = st.columns(2)
 
     with type_input:
-        transaction_type = st.selectbox("거래 유형", ["지출", "소득"], key="transaction_type_radio")
+        transaction_type = st.selectbox("거래 유형", ["지출", "소득"], key="transaction_type_selectbox")
 
     with year_input:
         current_year = datetime.now().year

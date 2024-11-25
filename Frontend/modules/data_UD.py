@@ -18,7 +18,7 @@ def update_delete_userdata():
     type_input, year_input, month_input = st.columns(3)
 
     with type_input:
-        transaction_type = st.radio("조회할 데이터를 입력하세요", ["지출", "소득"])
+        transaction_type = st.selectbox("조회할 데이터를 입력하세요", ["지출", "소득"])
 
     with year_input:
         current_year = datetime.now().year
