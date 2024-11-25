@@ -34,7 +34,7 @@ def data_analysis_page():
         month = st.selectbox("월", list(range(1, 13)), index=current_month - 1)
 
     # 데이터 조회 버튼
-    if st.button("데이터 조회", key="for monthly data", use_container_width=True, type='primary'):
+    if st.button("데이터 조회", key="for monthly data", use_container_width=True, type='secondary'):
         st.session_state.monthly_data_fetched = True
         st.session_state.monthly_params = {"year": year, "month": month}
         st.session_state.monthly_transaction_type = transaction_type

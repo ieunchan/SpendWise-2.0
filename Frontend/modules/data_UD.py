@@ -29,22 +29,20 @@ def update_delete_userdata():
         month = st.selectbox("월", list(range(1, 13)), index=current_month - 1, key="UD month input")
 
     # 버튼 섹션
-    data_view, reset = st.columns(2)
-    with data_view:
-        if st.button("데이터 조회", key="data for update/delete", use_container_width=True):
-            st.session_state.update_data_fetched = True
-            st.session_state.update_params = {"year": year, "month": month, "transaction_type": transaction_type}
-            st.session_state.update_show_data = True  # 데이터 표시 플래그
-    with reset:
-        if st.button("새로고침", key="button for rerun", use_container_width=True, type='primary'):
-            st.rerun()
+    if st.button("데이터 조회", key="data for update/delete", use_container_width=True):
+        st.session_state.update_data_fetched = True
+        st.session_state.update_params = {"year": year, "month": month, "transaction_type": transaction_type}
+        st.session_state.update_show_data = True  # 데이터 표시 플래그
+        # 데이터 조회 직후 상태 리셋
 
     # 데이터 조회 및 편집 UI 표시
     if st.session_state.update_data_fetched:
         params = st.session_state.update_params
         show_all_data_with_edit(params, transaction_type)
+        st.session_state.update_data_fetched = False
 
 
+@st.dialog('상세보기')
 def show_all_data_with_edit(params, transaction_type):
     # API로 데이터 가져오기
     data = fetch_data(GET_ALL_DATA, params=params)

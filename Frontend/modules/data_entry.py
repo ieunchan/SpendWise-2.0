@@ -10,7 +10,7 @@ DATA_CREATE = config("DATA_CREATE")
 def data_entry_page():
     # 초기 상태 설정
     if "transaction_type" not in st.session_state:
-        st.session_state.transaction_type = "지출" 
+        st.session_state.transaction_type = "지출"
     if "description" not in st.session_state:
         st.session_state.description = ""
     if "description_detail" not in st.session_state:
