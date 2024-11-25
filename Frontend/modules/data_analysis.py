@@ -27,14 +27,14 @@ def data_analysis_page():
 
     with year_input:
         current_year = datetime.now().year
-        year = st.selectbox("년도", list(range(current_year - 10, current_year + 1)), index=10)
+        year = st.selectbox(f"년도", list(range(current_year - 10, current_year + 1)), index=10)
 
     with month_input:
         current_month = datetime.now().month
         month = st.selectbox("월", list(range(1, 13)), index=current_month - 1)
 
     # 데이터 조회 버튼
-    if st.button("데이터 조회", key="for monthly data"):
+    if st.button("데이터 조회", key="for monthly data", use_container_width=True, type='primary'):
         st.session_state.monthly_data_fetched = True
         st.session_state.monthly_params = {"year": year, "month": month}
         st.session_state.monthly_transaction_type = transaction_type
@@ -69,19 +69,20 @@ def display_expense_data(params, year, month):
             st.write(f"{i}. {item['description']}: {item['total_amount']:,} 원")
 
         # 원형 그래프 생성 및 표시
-        data = pd.DataFrame(rank_data)
-        display_expense_pie_chart(data, title="지출 차트")
+        with st.container(border=True):
+            data = pd.DataFrame(rank_data)
+            display_expense_pie_chart(data, title="지출 차트")
 
         # radio 버튼으로 항목 선택
         st.markdown("#### 자세히 볼 항목을 선택하세요")
-        selected_category = st.radio(
+        selected_category = st.selectbox(
             label="상세내역",
             options=data["description"].unique(),
             index=0  # 기본값으로 첫 번째 항목 선택
         )
 
         # 상세 내역 조회 버튼 클릭
-        if st.button("상세 내역 조회"):
+        if st.button("상세 내역 조회", use_container_width=True):
             st.session_state.monthly_show_details = True
             st.session_state.monthly_selected_category = selected_category
 
@@ -110,8 +111,9 @@ def display_income_data(params, year, month):
             st.markdown(f"##### • {item['날짜']} [{item['내역']}]: {item['금액']:,}원")
 
         # 소득 차트 표시
-        income_pie_data = pd.DataFrame(income_rank_data)
-        display_income_pie_chart(income_pie_data, title="소득 차트")
+        with st.container():
+            income_pie_data = pd.DataFrame(income_rank_data)
+            display_income_pie_chart(income_pie_data, title="소득 차트")
 
     except ValueError as e:
         st.error(e)

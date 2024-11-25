@@ -1,5 +1,6 @@
 from decouple import AutoConfig
 from datetime import date
+import asyncio
 import streamlit as st
 import requests
 
