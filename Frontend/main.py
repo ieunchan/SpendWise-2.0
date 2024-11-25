@@ -6,12 +6,12 @@ from modules.api_list import GET_TOTAL_ASSETS
 from modules.utils import fetch_data
 import streamlit as st
 
-st.markdown("# Spend Wise!")
+st.header("SPEND WISE!")
 data = fetch_data(GET_TOTAL_ASSETS)
 # 숫자 값 추출
 if data and isinstance(data, list) and "total_asset" in data[0]:
     total_amount = data[0]["total_asset"]
-    st.markdown(f"<span style='color:#1E90FF; font-size:24px;'> 나의 총 자산: {total_amount:,} 원</span>",
+    st.markdown(f"<span style='color:#1E90FF; font-size:34px;'> 나의 총 자산: {total_amount:,} 원</span>",
                 unsafe_allow_html=True)
 else:
     st.write("데이터가 올바르지 않습니다.")
