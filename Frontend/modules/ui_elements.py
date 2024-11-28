@@ -92,8 +92,8 @@ def display_income_line_graph(data, title="월별 소득 총액"):
         y=df["total_amount"],
         mode="lines+markers+text",
         name="월별 소득 합계",
-        line=dict(color="indianred", width=5),
-        marker=dict(color="indianred", size=15),
+        line=dict(color="#2496ED", width=5),
+        marker=dict(color="white", size=15),
         text=[f"{v:,}원" for v in df["total_amount"]],  # 점 위에 표시할 텍스트
         textposition="top center",  # 텍스트 위치 (점 위 중앙)
         hovertemplate='%{x}월: %{y:,}원'  # 툴팁 포맷 설정
