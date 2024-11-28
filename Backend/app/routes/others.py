@@ -121,3 +121,51 @@ def update_userdata(
     db.refresh(db_userdata)
 
     return db_userdata
+
+# 프론트에서 연간 데이터 소득/지출 병합용 선그래프 API
+@router.get("/line_graph", response_model=List[dict])
+def get_annual_monthly_expense_total(
+    year: int = Query(..., description="조회할 년도"),
+    db: Session = Depends(get_db)
+):
+    try:
+        results = []  # 소득/지출 데이터를 병합하여 저장할 리스트
+
+        for month in range(1, 13):
+            start_of_month, end_of_month = get_month_range(year, month)
+            
+            # 지출 합계 계산
+            monthly_expense_total = (
+                db.query(func.sum(Userdata.amount).label('total_amount'))
+                .filter(Userdata.transaction_type == "지출")
+                .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+                .scalar()
+            ) or 0  # None이면 0으로 설정
+
+            # 소득 합계 계산
+            monthly_income_total = (
+                db.query(func.sum(Userdata.amount).label('total_amount'))
+                .filter(Userdata.transaction_type == "소득")
+                .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+                .scalar()
+            ) or 0  # None이면 0으로 설정
+
+            # 결과 병합
+            results.append({
+                "year": year,
+                "month": month,
+                "transaction_type": "지출",
+                "total_amount": monthly_expense_total
+            })
+            results.append({
+                "year": year,
+                "month": month,
+                "transaction_type": "소득",
+                "total_amount": monthly_income_total
+            })
+
+        return results  # JSON 형태로 반환
+
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="월별 소득/지출 합계 계산 중 오류가 발생했습니다.")
