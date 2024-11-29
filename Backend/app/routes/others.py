@@ -88,7 +88,7 @@ def delete_data(
 
 
 # 데이터 생성 API
-@router.post("/", response_model=UserdataResponse)
+@router.post("/create/", response_model=UserdataResponse)
 def create_userdata(userdata: UserdataCreate, db: Session = Depends(get_db)):
     db_userdata = Userdata(**userdata.model_dump())
     db.add(db_userdata)
@@ -123,7 +123,7 @@ def update_userdata(
     return db_userdata
 
 # 프론트에서 연간 데이터 소득/지출 병합용 선그래프 API
-@router.get("/line_graph", response_model=List[dict])
+@router.get("/bar_graph/", response_model=List[dict])
 def get_annual_monthly_expense_total(
     year: int = Query(..., description="조회할 년도"),
     db: Session = Depends(get_db)

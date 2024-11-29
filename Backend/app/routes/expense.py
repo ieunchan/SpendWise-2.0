@@ -101,7 +101,6 @@ def get_expense_details(
 @router.get("/annual", response_model=List[ExpenseSummary])
 def get_annual_expense_by_description(
     year: int = Query(..., description="조회할 연도"),
-    transaction_type: str = Query(..., description="년도 별 지출"),
     db: Session = Depends(get_db)
 ):
     try:
@@ -109,7 +108,7 @@ def get_annual_expense_by_description(
             db.query(Userdata.description, func.sum(Userdata.amount).label("total_amount"))
             .filter(
                 and_(
-                    Userdata.transaction_type == transaction_type,
+                    Userdata.transaction_type == '지출',
                     func.extract('year', Userdata.date) == year
                 )
             )
@@ -131,30 +130,30 @@ def get_annual_expense_by_description(
         raise HTTPException(status_code=500, detail="연도별 데이터베이스 쿼리 중 오류가 발생했습니다.")
 
 
-# 월별 지출 API
-@router.get("/monthly", response_model=List[dict])
-def get_annual_monthly_expense_total(
-    year: int = Query(..., description="조회할 년도"),
-    db: Session = Depends(get_db)
-):
-    try:
-        month_total = []
-        for month in range(1, 13):
-            start_of_month, end_of_month = get_month_range(year, month)
-            monthly_total = (
-                db.query(func.sum(Userdata.amount).label('total_amount'))
-                .filter(Userdata.transaction_type == "지출")
-                .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
-                .scalar()
-            )
-            if monthly_total is None:
-                monthly_total = 0
-            month_total.append({
-                "year": year,
-                "month": month,
-                "total_amount": monthly_total
-            })
-        return month_total
-    except SQLAlchemyError as e:
-        print(f"SQLAlchemy Error: {str(e)}")
-        raise HTTPException(status_code=500, detail="월별 지출 합계 계산 중 오류가 발생했습니다.")
+# # 월별 지출 API
+# @router.get("/monthly", response_model=List[dict])
+# def get_annual_monthly_expense_total(
+#     year: int = Query(..., description="조회할 년도"),
+#     db: Session = Depends(get_db)
+# ):
+#     try:
+#         month_total = []
+#         for month in range(1, 13):
+#             start_of_month, end_of_month = get_month_range(year, month)
+#             monthly_total = (
+#                 db.query(func.sum(Userdata.amount).label('total_amount'))
+#                 .filter(Userdata.transaction_type == "지출")
+#                 .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+#                 .scalar()
+#             )
+#             if monthly_total is None:
+#                 monthly_total = 0
+#             month_total.append({
+#                 "year": year,
+#                 "month": month,
+#                 "total_amount": monthly_total
+#             })
+#         return month_total
+#     except SQLAlchemyError as e:
+#         print(f"SQLAlchemy Error: {str(e)}")
+#         raise HTTPException(status_code=500, detail="월별 지출 합계 계산 중 오류가 발생했습니다.")
