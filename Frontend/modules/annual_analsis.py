@@ -1,5 +1,5 @@
-from modules.ui_elements import display_expense_pie_chart, display_expense_line_graph, display_income_pie_chart,display_income_line_graph
-from modules.api_list import GET_ANNUAL_EXPENSE_RANK, GET_ANNUAL_INCOME_RANK, GET_MONTHLY_EXPENSE_DATA,GET_MONTHLY_INCOME_DATA
+from modules.ui_elements import display_expense_pie_chart, display_expense_line_graph, display_income_pie_chart,display_income_line_graph, display_combined_bar_chart
+from modules.api_list import GET_ANNUAL_EXPENSE_RANK, GET_ANNUAL_INCOME_RANK, GET_MONTHLY_EXPENSE_DATA,GET_MONTHLY_INCOME_DATA, GET_EXPENSE_INCOME_LINE_GRAPH_DATA
 from modules.utils import fetch_data
 from datetime import datetime
 import streamlit as st
@@ -55,9 +55,9 @@ def display_annual_expense_data(params, year, transaction_type):
 
         # 월별 지출 
         with st.container(border=True):
-            monthly_expense_amount = fetch_data(GET_MONTHLY_EXPENSE_DATA, params=params)
+            monthly_expense_amount = fetch_data(GET_EXPENSE_INCOME_LINE_GRAPH_DATA, params=params)
             expense_line_graph_data = pd.DataFrame(monthly_expense_amount)
-            display_expense_line_graph(expense_line_graph_data)
+            display_combined_bar_chart(expense_line_graph_data)
 
     else:
         st.write("데이터를 불러오지 못했습니다.")

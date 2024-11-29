@@ -6,6 +6,9 @@ from modules.api_list import GET_TOTAL_ASSETS
 from modules.utils import fetch_data
 import streamlit as st
 
+st.set_page_config(layout="wide", page_title="Spend Wise!", page_icon="💰")
+
+
 st.header("SPEND WISE!")
 data = fetch_data(GET_TOTAL_ASSETS)
 # 숫자 값 추출
@@ -22,7 +25,6 @@ tab1, tab2, tab3, tab4 = st.tabs(["데이터 입력", "월간 데이터 조회",
 # 각 탭별로 페이지 내용 표시
 with tab1:
     data_entry_page()
-
 
 with tab2:
     data_analysis_page()
