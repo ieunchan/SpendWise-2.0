@@ -1,3 +1,6 @@
+![3D_design](https://github.com/user-attachments/assets/551ef9f2-46e3-471b-839f-263354bf8d9f)
+11/30: 아스키 아트 추가
+
  # *SpendWise! 2.0*
 ## *더 효율적인 수입/지출 관리 시스템*
 
@@ -63,7 +66,7 @@
 + 2.1.1: 도커 컴포즈 => 11/21일 완료
   +	프론트엔드와 백엔드의 도커 컴포즈 통합: Docker Compose를 사용해 Streamlit 프론트엔드와 FastAPI 백엔드를 동시에 실행하도록 구성. => 11/21 완료.
   +	도커 실행 명령어:   ```docker-compose up --build```
-+ 2.2(예정): 저장된 데이터 수정, 삭제 기능(예정)
++ 2.2(예정): 저장된 데이터 수정, 삭제 기능
    + 데이터 수정 기능 => 11/22일 완료
       + ![수정 기능 추가](https://github.com/user-attachments/assets/15cd27cb-8b9e-479c-b473-c6a892e37e1f)
 
