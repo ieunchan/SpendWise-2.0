@@ -4,12 +4,18 @@ from modules.data_entry import data_entry_page
 from modules.data_UD import update_delete_userdata
 from modules.api_list import GET_TOTAL_ASSETS
 from modules.utils import fetch_data
+from modules.ui_elements import spendwise
 import streamlit as st
 
-st.set_page_config(layout="wide", page_title="Spend Wise!", page_icon="💰")
+st.set_page_config(layout="wide", page_title="Spend Wise!", page_icon="➕")
+
+# 아스키 아트 Spend Wise!
+spendwise()
 
 
-st.header("SPEND WISE!")
+
+
+
 data = fetch_data(GET_TOTAL_ASSETS)
 # 숫자 값 추출
 if data and isinstance(data, list) and "total_asset" in data[0]:

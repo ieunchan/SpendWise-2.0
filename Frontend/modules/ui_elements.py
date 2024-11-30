@@ -78,3 +78,40 @@ def display_combined_bar_chart(data, title="월별 소득 및 지출"):
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig)
+
+
+# Spend Wise! 아스키 아트
+def spendwise():
+    st.markdown("""
+<style>
+@keyframes color-change {
+ 0% { color: #0F1116; }  /* 시작: 배경색 */
+  50% { color: red; }     /* 중간: 빨간색 */
+  100% { color: #0F1116; } /* 끝: 다시 배경색 */
+}
+
+.animated-text {
+font-family: 'Courier New', monospace;
+font-size: 18px; /* 글자 크기 18 */
+font-weight: bold; /* 두껍게 */
+animation: color-change 2s ease-in-out infinite; /* 2초 간격으로 계속 색 변환 */
+line-height: 1.1; /* 줄 간격 조정 */
+white-space: pre;
+
+}
+</style>
+<div class="animated-text">
+ _____                                    __        __      __                             __     
+/\  _ `\                                 /\ \      /\ \  __/\ \    __                     /\ \    
+\ \,\S\_\    _____      __      ___      \_\ \     \ \ \/\ \ \ \  /\_\      ____     __   \ \ \   
+ \/_\__ \   /\ '__`\  /'__`\  /' _ `\    /'_` \     \ \ \ \ \ \ \ \/\ \    /',__\  /'__`\  \ \ \  
+   /\ \S\ \ \ \ \_\ \/\  __/  /\ \/\ \  /\ \_\ \     \ \ \_/ \_\ \ \ \ \  /\__, `\/\  __/   \ \_\ 
+   \ `\____\ \ \ ,__/\ \____\ \ \_\ \_\ \ \___,_\     \ `\___x___/  \ \_\ \/\____/\ \____\   \/\_\ \
+    
+    \/_____/  \ \ \/  \/____/  \/_/\/_/  \/__,_ /      '\/__//__/    \/_/  \/___/  \/____/    \/_/
+               \ \_\                                                                                                          
+                \/_/                                                                                                          
+                                                          
+
+</div>
+""", unsafe_allow_html=True)
