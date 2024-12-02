@@ -66,12 +66,18 @@
 + 2.1.1: 도커 컴포즈 => 11/21일 완료
   +	프론트엔드와 백엔드의 도커 컴포즈 통합: Docker Compose를 사용해 Streamlit 프론트엔드와 FastAPI 백엔드를 동시에 실행하도록 구성. => 11/21 완료.
   +	도커 실행 명령어:   ```docker-compose up --build```
-+ 2.2(예정): 저장된 데이터 수정, 삭제 기능
++ 2.2: 저장된 데이터 수정, 삭제 기능
    + 데이터 수정 기능 => 11/22일 완료
+ 
       + ![수정 기능 추가](https://github.com/user-attachments/assets/15cd27cb-8b9e-479c-b473-c6a892e37e1f)
+    
+        
+   + 데이터 삭제 기능 => 11/24일 완료
+      
+      
+      +  ![데이터 삭제](https://github.com/user-attachments/assets/b354f09f-713c-4efd-8d0c-10456306afb4)
 
-     
-   + 데이터 삭제 기능(예정)
+
 
 # 기술 스택 (Tech Stack)
 
