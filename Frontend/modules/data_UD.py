@@ -27,13 +27,13 @@ def update_delete_userdata():
     with month_input:
         current_month = datetime.now().month
         month = st.selectbox("월", list(range(1, 13)), index=current_month - 1, key="UD month input")
-
     # 버튼 섹션
     if st.button("데이터 조회", key="data for update/delete", use_container_width=True):
         st.session_state.update_data_fetched = True
         st.session_state.update_params = {"year": year, "month": month, "transaction_type": transaction_type}
         st.session_state.update_show_data = True  # 데이터 표시 플래그
         # 데이터 조회 직후 상태 리셋
+
 
     # 데이터 조회 및 편집 UI 표시
     if st.session_state.update_data_fetched:
@@ -56,7 +56,7 @@ def show_all_data_with_edit(params, transaction_type):
             with st.expander(f"{row['date']} -- {row['description']} -- [{row['description_detail']}] -- {row['amount']:,}원"):
                 with st.form(key=f"form_{row['id']}"):
                     # 입력 필드
-                    description = st.text_input("내역(식비, 교통비, 쇼핑, 기타)", value=row["description"], key=f"description_{row['id']}")
+                    description = st.selectbox("내역", ["식비", "교통비", "쇼핑", "기타", "송금"], key=f"description_{row['id']}")
                     description_detail = st.text_input(
                         "상세 내역", value=row["description_detail"], key=f"description_detail_{row['id']}"
                     )

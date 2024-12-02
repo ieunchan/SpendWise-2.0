@@ -14,16 +14,11 @@ def data_analysis_page():
         st.session_state.monthly_show_details = False
     if "monthly_params" not in st.session_state:
         st.session_state.monthly_params = {}
-    if "monthly_transaction_type" not in st.session_state:
-        st.session_state.monthly_transaction_type = None
     if "monthly_selected_category" not in st.session_state:
         st.session_state.monthly_selected_category = None
 
     # 날짜 및 데이터 종류 선택
-    type_input, year_input, month_input = st.columns(3)
-
-    with type_input:
-        transaction_type = st.selectbox("조회할 데이터", ["지출", "소득"])
+    year_input, month_input = st.columns(2)
 
     with year_input:
         current_year = datetime.now().year
@@ -37,93 +32,85 @@ def data_analysis_page():
     if st.button("데이터 조회", key="for monthly data", use_container_width=True, type='secondary'):
         st.session_state.monthly_data_fetched = True
         st.session_state.monthly_params = {"year": year, "month": month}
-        st.session_state.monthly_transaction_type = transaction_type
         st.session_state.monthly_show_details = False  # 상세 조회 초기화
 
     # 데이터 표시
     if st.session_state.monthly_data_fetched:
         params = st.session_state.monthly_params
-        transaction_type = st.session_state.monthly_transaction_type
+        show_expense_amount_rank, show_income_amount = st.columns(2)
+        show_expense_pie_chart, show_income_pie_chart = st.columns(2)
 
-        if transaction_type == "지출":
-            display_expense_data(params, year, month)
-        elif transaction_type == "소득":
-            display_income_data(params, year, month)
-
-
-def display_expense_data(params, year, month):
-    """지출 데이터를 조회하고 결과를 Streamlit에 표시하는 함수"""
-    try:
-        # 지출 데이터 가져오기
-        expense_data = fetch_data(GET_USERDATA_EXPENSE, params=params)
-        total_expense = sum(expense['amount'] for expense in expense_data)
-        st.markdown(
-            f"<span style='color:#C74446; font-size:24px;'>{year}년 {month}월 지출 : {total_expense:,} 원</span>",
-            unsafe_allow_html=True
-        )
-
-        # 지출 랭킹 데이터 가져오기
-        rank_data = fetch_data(GET_EXPENSE_RANKING, params=params)
-        st.markdown(f"### {year}년 {month}월 지출 내역 순위")
-        for i, item in enumerate(rank_data, start=1):
-            st.write(f"{i}. {item['description']}: {item['total_amount']:,} 원")
-
-        # 원형 그래프 생성 및 표시
+        with show_expense_amount_rank:
+            with st.container(border=True):
+                display_expense_amount_rank(params, year, month)
+        with show_income_amount:
+            with st.container(border=True):
+                display_income_amount_rank(params, year, month)
+        with show_expense_pie_chart:
+            with st.container(border=True):
+                display_month_expense_pie_chart(params)
+        with show_income_pie_chart:
+            with st.container(border=True):
+                display_month_income_pie_chart(params)
         with st.container(border=True):
-            data = pd.DataFrame(rank_data)
-            display_expense_pie_chart(data, title="지출 차트")
-
-        # radio 버튼으로 항목 선택
-        st.markdown("#### 자세히 볼 항목을 선택하세요")
-        selected_category = st.selectbox(
-            label="상세내역",
-            options=data["description"].unique(),
-            index=0  # 기본값으로 첫 번째 항목 선택
-        )
-
-        # 상세 내역 조회 버튼 클릭
-        if st.button("상세 내역 조회", use_container_width=True):
-            st.session_state.monthly_show_details = True
-            st.session_state.monthly_selected_category = selected_category
-
-        # 상세 내역 표시
-        if st.session_state.monthly_show_details:
-            display_expense_details(st.session_state.monthly_selected_category, params)
-
-    except ValueError as e:
-        st.error(e)
+            display_expense_details(params)
 
 
-def display_income_data(params, year, month):
+def display_expense_amount_rank(params, year, month):
+    """지출 데이터를 조회하고 결과를 Streamlit에 표시하는 함수"""
+    # 지출 데이터 가져오기
+    expense_data = fetch_data(GET_USERDATA_EXPENSE, params=params)
+    total_expense = sum(expense['amount'] for expense in expense_data)
+    st.markdown(
+        f"<span style='color:#C74446; font-size:24px;'>{year}년 {month}월 지출 : {total_expense:,} 원</span>",
+        unsafe_allow_html=True)
+    # 지출 랭킹 데이터 가져오기
+    rank_data = fetch_data(GET_EXPENSE_RANKING, params=params)
+
+    for i, item in enumerate(rank_data, start=1):
+        st.markdown(f"#### {i}. {item['description']}: {item['total_amount']:,} 원")
+
+def display_income_amount_rank(params, year, month):
     """소득 데이터를 조회하고 결과를 Streamlit에 표시하는 함수"""
-    try:
-        # 소득 데이터 가져오기
-        income_data = fetch_data(GET_USERDATA_INCOME, params=params)
-        total_income = sum(income['amount'] for income in income_data)
-        st.markdown(
-            f"<span style='color:#1E90FF; font-size:24px;'>{year}년 {month}월 소득 : {total_income:,} 원</span>",
-            unsafe_allow_html=True
-        )
+    # 소득 데이터 가져오기
+    income_data = fetch_data(GET_USERDATA_INCOME, params=params)
+    total_income = sum(income['amount'] for income in income_data)
+    st.markdown(
+        f"<span style='color:#1E90FF; font-size:24px;'>{year}년 {month}월 소득 : {total_income:,} 원</span>",
+        unsafe_allow_html=True
+    )
 
-        # 소득 랭킹 데이터 가져오기
-        income_rank_data = fetch_data(GET_INCOME_RANKING, params=params)
-        for item in income_rank_data:
-            st.markdown(f"##### • {item['날짜']} [{item['내역']}]: {item['금액']:,}원")
-
-        # 소득 차트 표시
-        with st.container():
-            income_pie_data = pd.DataFrame(income_rank_data)
-            display_income_pie_chart(income_pie_data, title="소득 차트")
-
-    except ValueError as e:
-        st.error(e)
+    # 소득 랭킹 데이터 가져오기
+    income_rank_data = fetch_data(GET_INCOME_RANKING, params=params)
+    for item in income_rank_data:
+        st.markdown(f"##### • {item['날짜']} [{item['내역']}]: {item['금액']:,}원")
 
 
-def display_expense_details(selected_category, params):
-    """선택된 항목에 대한 상세 내역을 표시하는 함수"""
+def display_month_expense_pie_chart(params):
+    data = pd.DataFrame(fetch_data(GET_EXPENSE_RANKING, params=params))
+    display_expense_pie_chart(data, title="지출 차트")
+
+def display_month_income_pie_chart(params):
+    income_pie_data = pd.DataFrame(fetch_data(GET_INCOME_RANKING, params=params))
+    display_income_pie_chart(income_pie_data, title="소득 차트")
+
+def display_expense_details(params):
+    # radio 버튼으로 항목 선택
+    st.markdown("#### 자세히 볼 항목을 선택하세요")
+    data = pd.DataFrame(fetch_data(GET_EXPENSE_RANKING, params=params))
+    selected_category = st.selectbox(
+        label="상세내역",
+        options=data["description"].unique(),
+        index=0  # 기본값으로 첫 번째 항목 선택
+    )
+
+    # description 추가
     detail_params = {**params, "description": selected_category}
+
+    # Fetch 데이터
     expense_details = fetch_data(GET_EXPENSE_DETAILS, params=detail_params)
 
+    # 상세 데이터 표시
     if expense_details:
         detail_dataframe = pd.DataFrame(expense_details)
         detail_dataframe['금액'] = detail_dataframe['금액'].apply(lambda x: f"{x:,}")
@@ -131,3 +118,6 @@ def display_expense_details(selected_category, params):
         st.table(detail_dataframe)
     else:
         st.write(f"{selected_category}에 대한 상세 내역이 없습니다.")
+
+
+

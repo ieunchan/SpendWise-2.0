@@ -3,11 +3,6 @@ import plotly.express as px
 import streamlit as st
 import pandas as pd
 
-def display_selectbox(options, label="선택"):
-    """Streamlit selectbox 생성 함수"""
-    return st.selectbox(label, options)
-
-
 # 지출 부분 파이차트
 def display_expense_pie_chart(data, title="지출 차트"):
     """Plotly 원형 그래프 표시"""
@@ -18,14 +13,19 @@ def display_expense_pie_chart(data, title="지출 차트"):
         textinfo="text",
         hovertemplate="%{label}: %{value:,}원<extra></extra>",
         marker=dict(colors=custom_colors),
-        pull=[0.2] * len(data)
+        pull=[0.09] * len(data)
     )
     st.plotly_chart(fig)
 
 
 # 소득 부분 파이차트
-def display_income_pie_chart(data, title="소득 그래프"):
+def display_income_pie_chart(data, title="소득 차트"):
     """원형 그래프 표시 - 소득 전용"""
+
+    if data is None or len(data) == 0:  # data가 None이거나 비어있는 경우
+        st.warning("표시할 데이터가 없습니다.")
+        return  # 함수 종료
+
     custom_colors = ["#1E90FF", "#4169E1", "#00BFFF", "#87CEFA", "#4682B4"]
     fig = px.pie(data, names="내역", values="금액", title=title, hole=0.3)
     fig.update_traces(
@@ -34,7 +34,7 @@ def display_income_pie_chart(data, title="소득 그래프"):
         textposition="auto",
         hovertemplate="%{label}: %{value:,}원<extra></extra>",
         marker=dict(colors=custom_colors),
-        pull=[0.02] * len(data)  # 조각 간격 조정
+        pull=[0.09] * len(data)  # 조각 간격 조정
     )
     st.plotly_chart(fig)
 

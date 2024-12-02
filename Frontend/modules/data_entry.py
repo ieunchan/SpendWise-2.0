@@ -32,9 +32,9 @@ def data_entry_page():
     if st.session_state.transaction_type == "지출":
         st.session_state.description = st.selectbox(
             "내역",
-            ["식비", "교통비", "쇼핑", "기타"],
+            ["식비", "교통비", "쇼핑", "기타", "송금"],
             index=0 if st.session_state.description == "" else
-            ["식비", "교통비", "쇼핑", "기타"].index(st.session_state.description)
+            ["식비", "교통비", "쇼핑", "기타", "송금"].index(st.session_state.description)
         )
         st.session_state.description_detail = st.text_input(
             "상세 내역 설명을 입력하세요",
