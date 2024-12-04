@@ -16,7 +16,7 @@ def get_annual_data():
         annual_params = {"year": year} # API 요청 파라미터
 
         annual_expense_description_data_total, annual_income_description_data_total = st.columns(2)
-        annual_expense_pie_chart, annual_income_pie_chart = st.columns(2)
+        annual_expense_pie_chart, annual_income_pie_chart = st.columns([1,1.3])
         
         with annual_expense_description_data_total: # 연간 지출내역 별 지출 순위 
             with st.container(border=True):

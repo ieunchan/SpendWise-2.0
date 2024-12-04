@@ -38,7 +38,7 @@ def data_analysis_page():
     if st.session_state.monthly_data_fetched:
         params = st.session_state.monthly_params
         show_expense_amount_rank, show_income_amount = st.columns(2)
-        show_expense_pie_chart, show_income_pie_chart = st.columns(2)
+        show_expense_pie_chart, show_income_pie_chart = st.columns([1,1.3])
 
         with show_expense_amount_rank:
             with st.container(border=True):

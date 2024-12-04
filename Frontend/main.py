@@ -9,18 +9,16 @@ import streamlit as st
 
 st.set_page_config(layout="wide", page_title="Spend Wise!", page_icon="➕")
 
+
 # 아스키 아트 Spend Wise!
 spendwise()
-
-
-
 
 
 data = fetch_data(GET_TOTAL_ASSETS)
 # 숫자 값 추출
 if data and isinstance(data, list) and "total_asset" in data[0]:
     total_amount = data[0]["total_asset"]
-    st.markdown(f"<span style='color:#1E90FF; font-size:34px;'> 나의 총 자산: {total_amount:,} 원</span>",
+    st.markdown(f"<span style='color:#1E90FF; font-size:34px;'> 총 자산: {total_amount:,} 원</span>",
                 unsafe_allow_html=True)
 else:
     st.write("데이터가 올바르지 않습니다.")

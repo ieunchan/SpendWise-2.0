@@ -6,7 +6,7 @@ import pandas as pd
 # 지출 부분 파이차트
 def display_expense_pie_chart(data, title="지출 차트"):
     """Plotly 원형 그래프 표시"""
-    custom_colors = ["#5E2021", "#6F392A", "#4D3622", "#704C27", "#FF8C33"]
+    custom_colors = ["#E53935", "#F44336", "#FF5252", "#FF6E6E", "#FF8A80"]
     fig = px.pie(data, names="description", values="total_amount", title=title, hole=0.3)
     fig.update_traces(
         text=[f"{desc}: {amt:,}원" for desc, amt in zip(data["description"], data["total_amount"])],
@@ -59,11 +59,11 @@ def display_combined_bar_chart(data, title="월별 소득 및 지출"):
         labels={"total_amount": "금액 (원)", "month": "월", "transaction_type": "거래 유형"},
         title=title,
         text="total_amount", # 막대그래프에 표시할 텍스트
-        color_discrete_map={"지출": "#62090A", "소득": "#001A5C"}  # 색상 지정
+        color_discrete_map = {"지출": "#C62828", "소득": "#1E3A8A"}  # 진한 색상 지정
     )
 
     # 그래프 레이아웃 설정
-    fig.update_traces(texttemplate='%{text:,}원', textposition="inside", textfont=dict(size=22, color="#FFEEAA"),)  # 텍스트 표시 형식
+    fig.update_traces(texttemplate='%{text:,}원', textposition="auto", textfont=dict(size=22, color="#F7E8C7"))  # 텍스트 표시 형식
     fig.update_layout(
         template="plotly_dark",
         xaxis=dict(
@@ -85,22 +85,28 @@ def spendwise():
     st.markdown("""
 <style>
 @keyframes color-change {
- 0% { color: #0F1116; }  /* 시작: 배경색 */
-  50% { color: red; }     /* 중간: 빨간색 */
-  100% { color: #0F1116; } /* 끝: 다시 배경색 */
+  0% { background-position: 0% 50%; }  /* 왼쪽에서 시작 */
+  100% { background-position: 100% 50%; } /* 오른쪽으로 이동 */
 }
 
-.animated-text {
-font-family: 'Courier New', monospace;
-font-size: 18px; /* 글자 크기 18 */
-font-weight: bold; /* 두껍게 */
-animation: color-change 2s ease-in-out infinite; /* 2초 간격으로 계속 색 변환 */
-line-height: 1.1; /* 줄 간격 조정 */
-white-space: pre;
 
+.rainbow-text {
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #F7E8C7, #333333); /* 진한 파랑 → 부드러운 검정 */
+  background-size: 35%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: color-change 10s linear infinite; /* 일정 속도로 이동 */
+  line-height: 1.1 ;
+  white-space: pre;
+  margin-top: -70px;
+  margin-bottom: 100px;
+  padding: -100px;
 }
 </style>
-<div class="animated-text">
+<div class="rainbow-text">
  _____                                    __        __      __                             __     
 /\  _ `\                                 /\ \      /\ \  __/\ \    __                     /\ \    
 \ \,\S\_\    _____      __      ___      \_\ \     \ \ \/\ \ \ \  /\_\      ____     __   \ \ \   
@@ -115,3 +121,4 @@ white-space: pre;
 
 </div>
 """, unsafe_allow_html=True)
+

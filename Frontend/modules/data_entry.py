@@ -19,7 +19,6 @@ def data_entry_page():
         st.session_state.amount = 0
     if "date_input" not in st.session_state:
         st.session_state.date_input = date.today()
-    st.header("데이터를 입력하세요")
     
     # 거래 유형 선택
     st.session_state.transaction_type = st.selectbox(
