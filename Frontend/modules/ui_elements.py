@@ -49,6 +49,8 @@ def display_combined_bar_chart(data, title="월별 소득 및 지출"):
     # 데이터 병합
     combined_data = pd.concat([expense_data, income_data])
 
+    combined_data["formatted_amount"] = combined_data["total_amount"].apply(lambda x: f"{x:,}")
+
     # 막대그래프 생성
     fig = px.bar(
         combined_data,
