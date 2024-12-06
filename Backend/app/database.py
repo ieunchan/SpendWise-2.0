@@ -6,7 +6,17 @@ from decouple import AutoConfig
 # 데이터베이스 연결 및 ORM을 설정하는 파일입니다.
 
 config = AutoConfig()
-DATABASE_URL = config("DATABASE_URL")
+# DATABASE_URL = config("DATABASE_URL")
+
+
+# 환경 변수 가져오기
+DB_USER = config("DB_USER")
+DB_PASSWORD = config("DB_PASSWORD")
+DB_HOST = config("DB_HOST")
+DB_PORT = config("DB_PORT")
+DB_NAME = config("DB_NAME")
+
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
