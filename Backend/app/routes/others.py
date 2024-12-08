@@ -122,6 +122,56 @@ def update_userdata(
 
     return db_userdata
 
+# 프론트에서 연간 데이터 소득/지출 병합용 선그래프 API
+@router.get("/bar_graph/", response_model=List[dict])
+def get_annual_monthly_expense_total(
+    year: int = Query(..., description="조회할 년도"),
+    db: Session = Depends(get_db)
+):
+    
+    annual_total = (
+        db.query(func.extract("month", Userdata.date).label("month"), # month 컬럼을 빼서 "month"라는 이름을 붙힌다.
+                Userdata.transaction_type,                            # transaction_type 컬럼을 빼온다.
+                func.sum(Userdata.amount).label("total_amount")       # amount 컬럼의 합계를 구하고 "total_amount"라는 이름을 붙힌다.
+                )
+            .filter(Userdata.date >= f"{year}-01-01",                 # 조건은 예를들어 조회할 년도가 2024년이면: 2024-01-01 <= Userdata.date < 2025-01-01
+                    Userdata.date < f"{year+1}-01-01"
+                )
+            .group_by(
+                func.extract("month", Userdata.date),                 # 필터로 거르고 남은 데이터를 month 와 transaction_type으로 그룹화
+                Userdata.transaction_type
+            )
+            .all()
+        )
+    try:
+        results = []  # 소득/지출 데이터를 병합하여 저장할 리스트
+
+        for month in range(1, 13):
+            # 만약 데이터의 month가 지정된 월과 동일하면(반복문), {거래 유형 : 총 금액} 형식으로 반환
+            annual_monthly_data = {annual.transaction_type : annual.total_amount for annual in annual_total if annual.month == month} 
+            # 결과 병합
+            results.append({
+                "year": year,
+                "month": month,
+                "transaction_type": "지출",
+                "total_amount": annual_monthly_data.get("지출",0) # get을 사용하는 이유는 annual_monthly_data가 딕셔너리 형태이기 때문임.
+            })
+            results.append({
+                "year": year,
+                "month": month,
+                "transaction_type": "소득",
+                "total_amount": annual_monthly_data.get("소득",0)
+            })
+
+        return results  # JSON 형태로 반환
+
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="월별 소득/지출 합계 계산 중 오류가 발생했습니다.")
+    
+
+
+    
 # # 프론트에서 연간 데이터 소득/지출 병합용 선그래프 API
 # @router.get("/bar_graph/", response_model=List[dict])
 # def get_annual_monthly_expense_total(
@@ -171,49 +221,3 @@ def update_userdata(
 #         raise HTTPException(status_code=500, detail="월별 소득/지출 합계 계산 중 오류가 발생했습니다.")
     
 
-
-# 프론트에서 연간 데이터 소득/지출 병합용 선그래프 API
-@router.get("/bar_graph/", response_model=List[dict])
-def get_annual_monthly_expense_total(
-    year: int = Query(..., description="조회할 년도"),
-    db: Session = Depends(get_db)
-):
-    
-    annual_total = (
-        db.query(func.extract("month", Userdata.date).label("month"),
-                Userdata.transaction_type,
-                func.sum(Userdata.amount).label("total_amount")
-                )
-            .filter(Userdata.date >= f"{year}-01-01",
-                    Userdata.date < f"{year+1}-01-01"
-                )
-            .group_by(
-                func.extract("month", Userdata.date),
-                Userdata.transaction_type
-            )
-            .all()
-        )
-    try:
-        results = []  # 소득/지출 데이터를 병합하여 저장할 리스트
-
-        for month in range(1, 13):
-            annual_monthly_data = {annual.transaction_type : annual.total_amount for annual in annual_total if annual.month == month}
-            # 결과 병합
-            results.append({
-                "year": year,
-                "month": month,
-                "transaction_type": "지출",
-                "total_amount": annual_monthly_data.get("지출",0)
-            })
-            results.append({
-                "year": year,
-                "month": month,
-                "transaction_type": "소득",
-                "total_amount": annual_monthly_data.get("소득",0)
-            })
-
-        return results  # JSON 형태로 반환
-
-    except SQLAlchemyError as e:
-        print(f"SQLAlchemy Error: {str(e)}")
-        raise HTTPException(status_code=500, detail="월별 소득/지출 합계 계산 중 오류가 발생했습니다.")

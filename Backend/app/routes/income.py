@@ -13,7 +13,7 @@ from app.schemas import ExpenseSummary
 router = APIRouter()
 
 # 소득 데이터 조회 API (총 금액만 반환)
-@router.get("/", response_model=List[dict])
+@router.get("/", response_model=dict)
 def read_user_income_amount(
     year: int = Query(..., description="조회할 년도"),
     month: int = Query(..., description="조회할 월"),
@@ -24,15 +24,17 @@ def read_user_income_amount(
     except ValueError:
         raise HTTPException(status_code=400, detail="유효하지 않은 연도 또는 월입니다.")
 
-    income_amount = (
-        db.query(Userdata.amount)
-        .filter(Userdata.transaction_type == "소득")
-        .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
-        .all()
+    total_income = (
+        db.query(func.sum(Userdata.amount).label("total_amount"))
+        .filter(
+            Userdata.transaction_type == "소득",
+            Userdata.date >= start_of_month,
+            Userdata.date < end_of_month
+        )
+        .scalar()  # 단일 값 반환
     )
 
-    income_datas = [{"amount": amount[0]} for amount in income_amount]
-    return income_datas
+    return {"total_amount": total_income or 0}
 
 
 # 선택한 년도, 월의 순위 데이터를 반환하는 API
@@ -46,7 +48,7 @@ def income_ranking(
 
     try:
         income_rank = (
-            db.query(Userdata)
+            db.query(Userdata.date, Userdata.description, Userdata.amount)
             .filter(Userdata.transaction_type == "소득")
             .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
             .order_by(Userdata.date.desc())
@@ -80,19 +82,17 @@ def get_annual_income(
         annual_income = (
             db.query(Userdata.description, func.sum(Userdata.amount).label("total_amount"))
             .filter(
-                and_(
-                    Userdata.transaction_type == '소득',
-                    func.extract('year', Userdata.date) == year
-                )
+                Userdata.date >= f"{year}-01-01",
+                Userdata.date < f"{year+1}-01-01",
+                Userdata.transaction_type == '소득'
             )
             .group_by(Userdata.description)
-            .order_by(func.sum(Userdata.amount).desc())
             .all()
         )
 
         if not annual_income:
             return [{"description": "데이터 없음", "total_amount": 0}]
-
+        
         annual_income_data = [
             ExpenseSummary(description=item[0], total_amount=item[1])
             for item in annual_income
