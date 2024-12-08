@@ -10,7 +10,7 @@ def get_annual_data():
 
     with year_input:
         current_year = datetime.now().year
-        year = st.selectbox("년도", list(range(current_year - 10, current_year + 1)), index=10, key="annual_select")
+        year = st.selectbox("년도", list(range(current_year, current_year - 10, -1)), index=0, key="annual_select")
 
     if st.button("데이터 조회", key="annual_button", use_container_width=True, type='secondary'):
         annual_params = {"year": year} # API 요청 파라미터
@@ -56,17 +56,20 @@ def display_annual_expense_description_total(annual_params, year):
 
 
 def display_annual_income_description_total(annual_params, year):
+    
     annual_income_data = fetch_data(GET_ANNUAL_INCOME_RANK, params=annual_params)
-    if annual_income_data:
-        total_yearly_amount = sum(item.get("total_amount", 0) for item in annual_income_data)
-        st.write(f"<span style='color:#1E90FF; font-size:24px;'>{year}년 소득 합계 : {total_yearly_amount:,} 원</span>",
-        unsafe_allow_html=True)
-        for item in annual_income_data:
-            description = item.get("description")
-            total_amount = item.get("total_amount")
-            st.write(f"- {description}: {total_amount:,}원")
-    else:
+
+    if not annual_income_data:
         st.write("데이터 로드 중 에러가 발생했습니다.")
+        return
+    total_yearly_amount = sum(item.get("total_amount", 0) for item in annual_income_data)
+
+    st.write(f"<span style='color:#1E90FF; font-size:24px;'>{year}년 소득 합계 : {total_yearly_amount:,} 원</span>",
+    unsafe_allow_html=True)
+    for item in annual_income_data:
+        description = item.get("description")
+        total_amount = item.get("total_amount")
+        st.write(f"- {description}: {total_amount:,}원")
 
 # 연간 지출 내역(description) 별 파이차트
 def display_annual_expense_description_pie_chart(annual_params,year):

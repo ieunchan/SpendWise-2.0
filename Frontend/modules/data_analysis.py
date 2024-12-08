@@ -22,11 +22,11 @@ def data_analysis_page():
 
     with year_input:
         current_year = datetime.now().year
-        year = st.selectbox(f"년도", list(range(current_year - 10, current_year + 1)), index=10)
+        year = st.selectbox(f"년도", list(range(current_year, current_year - 10, -1)), index=0)
 
     with month_input:
         current_month = datetime.now().month
-        month = st.selectbox("월", list(range(1, 13)), index=current_month - 1)
+        month = st.selectbox("월", list(range(12,0, -1)), index= 12-current_month)
 
     # 데이터 조회 버튼
     if st.button("데이터 조회", key="for monthly data", use_container_width=True, type='secondary'):
@@ -74,7 +74,8 @@ def display_income_amount_rank(params, year, month):
     """소득 데이터를 조회하고 결과를 Streamlit에 표시하는 함수"""
     # 소득 데이터 가져오기
     income_data = fetch_data(GET_USERDATA_INCOME, params=params)
-    total_income = sum(income['amount'] for income in income_data)
+    total_income = income_data.get("total_amount", 0)  # "total_amount"가 없으면 0 반환
+
     st.markdown(
         f"<span style='color:#1E90FF; font-size:24px;'>{year}년 {month}월 소득 : {total_income:,} 원</span>",
         unsafe_allow_html=True

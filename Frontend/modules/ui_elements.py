@@ -1,3 +1,4 @@
+from datetime import datetime
 import plotly.graph_objects as go
 import plotly.express as px
 import streamlit as st
@@ -42,6 +43,11 @@ def display_income_pie_chart(data, title="소득 차트"):
 def display_combined_bar_chart(data, title="월별 소득 및 지출"):
     """월별 소득 및 지출 누적 막대 그래프 표시"""
 
+
+    # 요청 보낸 시간 기록
+    request_time = datetime.now()
+    st.write(f"📤 요청 보낸 시간: {request_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
     # 데이터를 Stacked Bar Chart 형태로 변환
     expense_data = data[data["transaction_type"] == '지출']
     income_data = data[data["transaction_type"] == '소득']
@@ -80,6 +86,14 @@ def display_combined_bar_chart(data, title="월별 소득 및 지출"):
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig)
+
+    # 완료 시간 기록
+    completion_time = datetime.now()
+    st.write(f"✅ 완료 시간: {completion_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    # 소요 시간 계산
+    elapsed_time = (completion_time - request_time).total_seconds()
+    st.write(f"⏱ 소요 시간: {elapsed_time:.2f}초")
 
 
 # Spend Wise! 아스키 아트
