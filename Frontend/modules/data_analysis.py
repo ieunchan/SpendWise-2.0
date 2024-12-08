@@ -3,6 +3,7 @@ from modules.ui_elements import display_expense_pie_chart, display_income_pie_ch
 from modules.utils import fetch_data
 from datetime import datetime
 import streamlit as st
+import time
 import pandas as pd
 
 def data_analysis_page():
@@ -109,16 +110,42 @@ def display_expense_details(params):
     detail_params = {**params, "description": selected_category}
 
     # Fetch 데이터
-    expense_details = fetch_data(GET_EXPENSE_DETAILS, params=detail_params)
+    # 시작 시간
+    total_start_time = time.time()
 
-    # 상세 데이터 표시
+    # 데이터 가져오기 시간 측정
+    fetch_start_time = time.time()
+    expense_details = fetch_data(GET_EXPENSE_DETAILS, params=detail_params)
+    fetch_end_time = time.time()
+
+    # 데이터 처리 시간 측정
+    process_start_time = time.time()
     if expense_details:
         detail_dataframe = pd.DataFrame(expense_details)
         detail_dataframe['금액'] = detail_dataframe['금액'].apply(lambda x: f"{x:,}")
+    process_end_time = time.time()
+
+    # 화면 렌더링 시간 측정
+    render_start_time = time.time()
+    if expense_details:
         st.markdown(f"### {selected_category} 상세 내역")
         st.table(detail_dataframe)
     else:
         st.write(f"{selected_category}에 대한 상세 내역이 없습니다.")
+    render_end_time = time.time()
 
+    # 전체 종료 시간
+    total_end_time = time.time()
+
+    # 단계별 시간 출력
+    fetch_time = fetch_end_time - fetch_start_time
+    process_time = process_end_time - process_start_time
+    render_time = render_end_time - render_start_time
+    total_time = total_end_time - total_start_time
+
+    st.markdown(f"**데이터 가져오기 시간**: {fetch_time:.2f}초")
+    st.markdown(f"**데이터 처리 시간**: {process_time:.2f}초")
+    st.markdown(f"**화면 렌더링 시간**: {render_time:.2f}초")
+    st.markdown(f"**총 소요 시간**: {total_time:.2f}초")
 
 
