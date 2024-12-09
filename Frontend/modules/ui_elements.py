@@ -86,41 +86,37 @@ def display_combined_bar_chart(data, title="월별 소득 및 지출"):
 def spendwise():
     st.markdown("""
 <style>
-@keyframes color-change {
-  0% { background-position: 0% 50%; }  /* 왼쪽에서 시작 */
-  100% { background-position: 100% 50%; } /* 오른쪽으로 이동 */
+@keyframes color-fade {
+  0% { color: #F7E8C7; }  /* 시작 색 */
+  50% { color: #000000; } /* 중간 색 */
+  100% { color: #F7E8C7; } /* 끝 색 */
 }
-
 
 .rainbow-text {
   font-family: 'Courier New', monospace;
   font-size: 18px;
   font-weight: bold;
-  background: linear-gradient(90deg, #F7E8C7, #333333); /* 진한 파랑 → 부드러운 검정 */
-  background-size: 35%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: color-change 10s linear infinite; /* 일정 속도로 이동 */
-  line-height: 1.1 ;
-  white-space: pre;
+  animation: color-fade 7s linear infinite; /* 색상이 점차 바뀌도록 설정 */
+  line-height: 1.1;
+  white-space: pre; /* 공백과 줄바꿈 유지 */
   margin-top: -70px;
   margin-bottom: 100px;
-  padding: -100px;
+  padding: 20px;
 }
+
+
 </style>
 <div class="rainbow-text">
- _____                                    __        __      __                             __     
-/\  _ `\                                 /\ \      /\ \  __/\ \    __                     /\ \    
-\ \,\S\_\    _____      __      ___      \_\ \     \ \ \/\ \ \ \  /\_\      ____     __   \ \ \   
- \/_\__ \   /\ '__`\  /'__`\  /' _ `\    /'_` \     \ \ \ \ \ \ \ \/\ \    /',__\  /'__`\  \ \ \  
-   /\ \S\ \ \ \ \_\ \/\  __/  /\ \/\ \  /\ \_\ \     \ \ \_/ \_\ \ \ \ \  /\__, `\/\  __/   \ \_\ 
-   \ `\____\ \ \ ,__/\ \____\ \ \_\ \_\ \ \___,_\     \ `\___x___/  \ \_\ \/\____/\ \____\   \/\_\ \
-    
-    \/_____/  \ \ \/  \/____/  \/_/\/_/  \/__,_ /      '\/__//__/    \/_/  \/___/  \/____/    \/_/
-               \ \_\                                                                                                          
-                \/_/                                                                                                          
-                                                          
-
-</div>
+     _____                                    __        __      __                             __     
+    /\  _ `\                                 /\ \      /\ \  __/\ \    __                     /\ \    
+    \ \,\S\_\    _____      __      ___      \_\ \     \ \ \/\ \ \ \  /\_\      ____     __   \ \ \   
+     \/_\__ \   /\ '__`\  /'__`\  /' _ `\    /'_` \     \ \ \ \ \ \ \ \/\ \    /',__\  /'__`\  \ \ \  
+       /\ \S\ \ \ \ \_\ \/\  __/  /\ \/\ \  /\ \_\ \     \ \ \_/ \_\ \ \ \ \  /\__, `\/\  __/   \ \_\ 
+       \ `\____\ \ \ ,__/\ \____\ \ \_\ \_\ \ \___,_\     \ `\___x___/  \ \_\ \/\____/\ \____\   \/\_\ \
+        
+        \/_____/  \ \ \/  \/____/  \/_/\/_/  \/__,_ /      '\/__//__/    \/_/  \/___/  \/____/    \/_/
+                   \ \_\                                                                                                          
+                    \/_/                                                                                                          
+                                                            
 """, unsafe_allow_html=True)
 
