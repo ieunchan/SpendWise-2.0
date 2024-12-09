@@ -13,7 +13,6 @@ st.set_page_config(layout="wide", page_title="Spend Wise!", page_icon="➕")
 # 아스키 아트 Spend Wise!
 spendwise()
 
-
 data = fetch_data(GET_TOTAL_ASSETS)
 # 숫자 값 추출
 if data and isinstance(data, list) and "total_asset" in data[0]:

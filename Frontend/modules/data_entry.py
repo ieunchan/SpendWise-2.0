@@ -1,10 +1,7 @@
-from decouple import AutoConfig
+from modules.api_list import DATA_CREATE
 from datetime import date
 import streamlit as st
 import requests
-
-config = AutoConfig()
-DATA_CREATE = config("DATA_CREATE")
 
 
 def data_entry_page():
