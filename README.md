@@ -1,6 +1,3 @@
-![3D_design](https://github.com/user-attachments/assets/551ef9f2-46e3-471b-839f-263354bf8d9f)
-11/30: 아스키 아트 추가
-
  # *SpendWise! 2.0*
 ## *더 효율적인 수입/지출 관리 시스템*
 
