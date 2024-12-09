@@ -4,6 +4,3 @@ backgroundColor = "#F7E8C7"            # 메인 배경 색상
 secondaryBackgroundColor = "#E2DDCE"   # 사이드바 배경 색상
 textColor = "#8B4513"                  # 텍스트 색상
 font = "monospace"                    # 폰트: sans serif, serif, monospace 중 선택
-
-
-
