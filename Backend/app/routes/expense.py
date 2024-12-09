@@ -80,7 +80,7 @@ def get_expense_details(
     start_of_month, end_of_month = get_month_range(year, month)
 
     expense_details = (
-        db.query(Userdata)
+        db.query(Userdata.description, Userdata.date, Userdata.description_detail, Userdata.amount)
         .filter(Userdata.description == description)
         .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
         .all()
