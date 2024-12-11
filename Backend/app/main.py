@@ -1,15 +1,21 @@
-from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-import time
 from app.routes import expense, income, others
+from fastapi import FastAPI, Request
+from decouple import AutoConfig
+import time
+
+config = AutoConfig()
+STREAMLIT_APP_URL = config("STREAMLIT_APP_URL")
+NGROK_URL = config("NGROK_URL")
+
 
 # FastAPI 인스턴스 생성
 app = FastAPI()
 
 # CORS 설정
 origins = [
-    "https://spendwise.streamlit.app",  # Streamlit 배포 URL
-    "https://d792-124-60-151-80.ngrok-free.app",  # Ngrok URL
+    STREAMLIT_APP_URL,  # Streamlit 배포 URL
+    NGROK_URL,  # Ngrok URL
 ]
 
 app.add_middleware(

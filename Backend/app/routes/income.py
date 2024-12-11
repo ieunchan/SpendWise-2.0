@@ -37,7 +37,7 @@ def read_user_income_amount(
     return {"total_amount": total_income or 0}
 
 
-# 선택한 년도, 월의 순위 데이터를 반환하는 API
+# 선택한 년도의 월의 순위 데이터를 반환하는 API
 @router.get("/ranking/", response_model=List[dict])
 def income_ranking(
     year: int = Query(..., description="조회할 년도"),
@@ -48,10 +48,19 @@ def income_ranking(
 
     try:
         income_rank = (
-            db.query(Userdata.date, Userdata.description, Userdata.amount)
-            .filter(Userdata.transaction_type == "소득")
-            .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
-            .order_by(Userdata.date.desc())
+            db.query(
+                Userdata.date, 
+                Userdata.description, 
+                Userdata.amount
+            )
+            .filter(
+                Userdata.transaction_type == "소득",
+                Userdata.date >= start_of_month, 
+                Userdata.date < end_of_month
+            )
+            .order_by(
+                Userdata.date.desc()
+            )
             .all()
         )
     except SQLAlchemyError as e:
@@ -86,7 +95,12 @@ def get_annual_income(
                 Userdata.date < f"{year+1}-01-01",
                 Userdata.transaction_type == '소득'
             )
-            .group_by(Userdata.description)
+            .group_by(
+                Userdata.description
+            )
+            .order_by(
+                func.sum(Userdata.amount).desc()
+            )
             .all()
         )
 

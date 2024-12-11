@@ -46,10 +46,16 @@ def expense_ranking(
     try:
         expense_rank = (
             db.query(Userdata.description, func.sum(Userdata.amount).label("total_amount"))
-            .filter(Userdata.transaction_type == "지출")
-            .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
-            .group_by(Userdata.description)
-            .order_by(func.sum(Userdata.amount).desc())
+            .filter(
+                Userdata.transaction_type == "지출",Userdata.date >= start_of_month, 
+                Userdata.date < end_of_month
+            )
+            .group_by(
+                Userdata.description
+            )
+            .order_by(
+                func.sum(Userdata.amount).desc()
+            )
             .all()
         )
     except SQLAlchemyError as e:
