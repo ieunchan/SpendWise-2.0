@@ -22,11 +22,11 @@ def update_delete_userdata():
 
     with year_input:
         current_year = datetime.now().year
-        year = st.selectbox("년도", list(range(current_year - 10, current_year + 1)), index=10, key="UD year input")
+        year = st.selectbox("년도", list(range(current_year, current_year - 10, -1)), index=0, key="UD year input")
 
     with month_input:
         current_month = datetime.now().month
-        month = st.selectbox("월", list(range(1, 13)), index=current_month - 1, key="UD month input")
+        month = st.selectbox("월", list(range(12, 0, -1)), index=12 - current_month, key="UD month input")
     # 버튼 섹션
     if st.button("데이터 조회", key="data for update/delete", use_container_width=True):
         st.session_state.update_data_fetched = True

@@ -7,7 +7,7 @@ import pandas as pd
 # 지출 부분 파이차트
 def display_expense_pie_chart(data, title="지출 차트"):
     """Plotly 원형 그래프 표시"""
-    custom_colors = ["#E53935", "#F44336", "#FF5252", "#FF6E6E", "#FF8A80"]
+    custom_colors = ["#B71C1C", "#D32F2F", "#E53935", "#F44336", "#FF5252", "#C62828"]
     fig = px.pie(data, names="description", values="total_amount", title=title, hole=0.3)
     fig.update_traces(
         text=[f"{desc}: {amt:,}원" for desc, amt in zip(data["description"], data["total_amount"])],
@@ -27,7 +27,7 @@ def display_income_pie_chart(data, title="소득 차트"):
         st.warning("표시할 데이터가 없습니다.")
         return  # 함수 종료
 
-    custom_colors = ["#1E90FF", "#4169E1", "#00BFFF", "#87CEFA", "#4682B4"]
+    custom_colors = ["#228B22", "#2E8B57", "#6B8E23", "#556B2F", "#3A5F0B", "#4E9258", "#2F4F2F"]
     fig = px.pie(data, names="내역", values="금액", title=title, hole=0.3)
     fig.update_traces(
         text=[f"{desc}: {amt:,}원" for desc, amt in zip(data["내역"], data["금액"])],
@@ -62,11 +62,21 @@ def display_combined_bar_chart(data, title="월별 소득 및 지출"):
         labels={"total_amount": "금액 (원)", "month": "월", "transaction_type": "거래 유형"},
         title=title,
         text="total_amount", # 막대그래프에 표시할 텍스트
-        color_discrete_map = {"지출": "#C62828", "소득": "#1E3A8A"}  # 진한 색상 지정
+        color_discrete_map = {"지출": "#C62828", "소득": "#3B62B5"},  # 진한 색상 지정
+        custom_data=["transaction_type"]
+
     )
 
     # 그래프 레이아웃 설정
-    fig.update_traces(texttemplate='%{text:,}원', textposition="auto", textfont=dict(size=22, color="#F7E8C7"))  # 텍스트 표시 형식
+    fig.update_traces(
+        texttemplate='%{text:,}원', 
+        textposition="auto", 
+        textfont=dict(size=16, color="#F7E8C7"),
+        hovertemplate="<b>거래 유형</b>: %{customdata[0]}<br>"
+                    "<b>월</b>: %{x}<br>"
+                    "<b>금액 (원)</b>: %{y:,.0f}원<br>"  # 금액에 천 단위 콤마 추가
+        )  
+    # 텍스트 표시 형식
     fig.update_layout(
         template="plotly_dark",
         xaxis=dict(
@@ -74,7 +84,11 @@ def display_combined_bar_chart(data, title="월별 소득 및 지출"):
             tickvals=list(range(1, 13)),  # x축 눈금: 1월~12월
             ticktext=[f"{i}월" for i in range(1, 13)],
         ),
-        yaxis=dict(tickformat=",", title="금액 (원)"),
+        yaxis=dict(
+            range=[0, combined_data["total_amount"].max() * 1],  # y축 범위 조정
+            tickformat=",", 
+            title="금액 (원)"
+        ),
         legend_title="거래 유형",
         height=500,  # 그래프 높이
     )
