@@ -35,29 +35,37 @@ def data_analysis_page():
         st.session_state.monthly_params = {"year": year, "month": month}
         st.session_state.monthly_show_details = False  # 상세 조회 초기화
 
+
+
     # 데이터 표시
     if st.session_state.monthly_data_fetched:
+
         params = st.session_state.monthly_params
+
+        # 월간 지출 랭킹을 담는 API. API 호출을 최소화 하기 위해 변수에 담는다.
+        expense_ranking_api = fetch_data(GET_EXPENSE_RANKING, params=params)
+
         show_expense_amount_rank, show_income_amount = st.columns(2)
+
         show_expense_pie_chart, show_income_pie_chart = st.columns([1,1.3])
 
         with show_expense_amount_rank:
             with st.container(border=True):
-                display_expense_amount_rank(params, year, month)
+                display_expense_amount_rank(params, year, month, expense_ranking_api)
         with show_income_amount:
             with st.container(border=True):
                 display_income_amount_rank(params, year, month)
         with show_expense_pie_chart:
             with st.container(border=True):
-                display_month_expense_pie_chart(params)
+                display_month_expense_pie_chart(expense_ranking_api)
         with show_income_pie_chart:
             with st.container(border=True):
                 display_month_income_pie_chart(params)
         with st.container(border=True):
-            display_expense_details(params)
+            display_expense_details(params, expense_ranking_api)
 
 
-def display_expense_amount_rank(params, year, month):
+def display_expense_amount_rank(params, year, month, expense_ranking_api):
     """지출 데이터를 조회하고 결과를 Streamlit에 표시하는 함수"""
     # 지출 데이터 가져오기
     expense_data = fetch_data(GET_USERDATA_EXPENSE, params=params)
@@ -66,9 +74,8 @@ def display_expense_amount_rank(params, year, month):
         f"<span style='color:#C74446; font-size:24px;'>{year}년 {month}월 지출 : {total_expense:,} 원</span>",
         unsafe_allow_html=True)
     # 지출 랭킹 데이터 가져오기
-    rank_data = fetch_data(GET_EXPENSE_RANKING, params=params)
 
-    for i, item in enumerate(rank_data, start=1):
+    for i, item in enumerate(expense_ranking_api, start=1):
         st.markdown(f"#### {i}. {item['description']}: {item['total_amount']:,} 원")
 
 def display_income_amount_rank(params, year, month):
@@ -88,18 +95,19 @@ def display_income_amount_rank(params, year, month):
         st.markdown(f"##### • {item['날짜']} [{item['내역']}]: {item['금액']:,}원")
 
 
-def display_month_expense_pie_chart(params):
-    data = pd.DataFrame(fetch_data(GET_EXPENSE_RANKING, params=params))
-    display_expense_pie_chart(data, title="지출 차트")
+def display_month_expense_pie_chart(expense_ranking_api):
+
+    month_expense_pie_data = pd.DataFrame(expense_ranking_api)
+    display_expense_pie_chart(month_expense_pie_data, title="지출 차트")
 
 def display_month_income_pie_chart(params):
     income_pie_data = pd.DataFrame(fetch_data(GET_INCOME_RANKING, params=params))
     display_income_pie_chart(income_pie_data, title="소득 차트")
 
-def display_expense_details(params):
+def display_expense_details(params, expense_ranking_api):
     # radio 버튼으로 항목 선택
     st.markdown("#### 자세히 볼 항목을 선택하세요")
-    data = pd.DataFrame(fetch_data(GET_EXPENSE_RANKING, params=params))
+    data = pd.DataFrame(expense_ranking_api)
     selected_category = st.selectbox(
         label="상세내역",
         options=data["description"].unique(),
@@ -109,11 +117,9 @@ def display_expense_details(params):
     # description 추가
     detail_params = {**params, "description": selected_category}
 
-    # 데이터 가져오기 시간 측정
     expense_details = fetch_data(GET_EXPENSE_DETAILS, params=detail_params)
 
-    # 데이터 처리 시간 측정
-    process_start_time = time.perf_counter()
+
     if expense_details:
         detail_dataframe = pd.DataFrame(expense_details)
         detail_dataframe['금액'] = detail_dataframe['금액'].apply(lambda x: f"{x:,}")
