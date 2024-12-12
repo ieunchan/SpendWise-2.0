@@ -1,6 +1,6 @@
 [theme]
-primaryColor = "#FF4B4B"               # 버튼 및 주요 색상
+primaryColor = "#395F0C"               # 버튼 및 주요 색상
 backgroundColor = "#F7E8C7"            # 메인 배경 색상
-secondaryBackgroundColor = "#395F0C"   # 사이드바 배경 색상
+secondaryBackgroundColor = "#D4D2D2"   # 사이드바 배경 색상
 textColor = "#8B4513"                  # 텍스트 색상
 font = "monospace"                    # 폰트: sans serif, serif, monospace 중 선택
