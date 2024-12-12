@@ -12,7 +12,7 @@ def get_annual_data():
         current_year = datetime.now().year
         year = st.selectbox("년도", list(range(current_year, current_year - 10, -1)), index=0, key="annual_select")
 
-    if st.button("데이터 조회", key="annual_button", use_container_width=True, type='secondary'):
+    if st.button("데이터 조회", key="annual_button", use_container_width=True, type='primary'):
         annual_params = {"year": year} # API 요청 파라미터
 
         annual_expense_description_data_total, annual_income_description_data_total = st.columns(2)

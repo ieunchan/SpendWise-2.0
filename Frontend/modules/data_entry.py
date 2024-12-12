@@ -68,11 +68,11 @@ def data_entry_page():
         and st.session_state.date_input
     )
 
-    # 전송 버튼만 남김
     if st.button(
         "데이터 전송 (전송 후 한번 더 누르면 초기화됩니다.)",
         key="데이터 입력 탭 데이터 제출 버튼",
         use_container_width=True,
+        type="primary"
     ):
         if is_valid:
             payload = {
