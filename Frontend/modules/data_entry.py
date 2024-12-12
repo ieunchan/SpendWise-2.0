@@ -68,53 +68,34 @@ def data_entry_page():
         and st.session_state.date_input
     )
 
-    # 모든 필드가 채워져야만 데이터 전송
-    submit_button, reset_button = st.columns(2)
+    # 전송 버튼만 남김
+    if st.button(
+        "데이터 전송 (전송 후 한번 더 누르면 초기화됩니다.)",
+        key="데이터 입력 탭 데이터 제출 버튼",
+        use_container_width=True,
+    ):
+        if is_valid:
+            payload = {
+                "transaction_type": st.session_state.transaction_type,
+                "description": st.session_state.description,
+                "description_detail": st.session_state.description_detail,
+                "amount": st.session_state.amount,
+                "date": str(st.session_state.date_input)
+            }
 
-    with submit_button:
-        if st.button(
-            "데이터 전송",
-            key="데이터 입력 탭 데이터 제출 버튼",
-            use_container_width=True,
-            type="primary"
-        ):
-            if is_valid:
-                payload = {
-                    "transaction_type": st.session_state.transaction_type,
-                    "description": st.session_state.description,
-                    "description_detail": st.session_state.description_detail,
-                    "amount": st.session_state.amount,
-                    "date": str(st.session_state.date_input)
-                }
-
-                # 백엔드로 데이터 전송
-                response = requests.post(DATA_CREATE, json=payload)
-                if response.status_code == 200:
-                    st.success("데이터 전송이 완료되었습니다.")
-                    st.json(response.json())
-                    # 필드값 초기화
-                    st.session_state.transaction_type = "지출"
-                    st.session_state.description = ""
-                    st.session_state.description_detail = ""
-                    st.session_state.amount = 0
-                    st.session_state.date_input = date.today()
-                else:
-                    st.error(f"오류 발생: {response.status_code}")
-                    st.write(response.text)
+            # 백엔드로 데이터 전송
+            response = requests.post(DATA_CREATE, json=payload)
+            if response.status_code == 200:
+                st.success("데이터 전송이 완료되었습니다.")
+                st.json(response.json())
+                # 필드값 자동 초기화
+                st.session_state.transaction_type = "지출"
+                st.session_state.description = ""
+                st.session_state.description_detail = ""
+                st.session_state.amount = 0
+                st.session_state.date_input = date.today()
             else:
-                st.error("모든 필드가 올바르게 입력되어야 제출할 수 있습니다.")
-    
-    with reset_button:
-        if st.button(
-            "초기화",
-            key="데이터 입력탭 초기화 버튼",
-            use_container_width=True,
-            type="secondary"
-        ):
-            # 필드값 초기화
-            st.session_state.transaction_type = "지출"
-            st.session_state.description = ""
-            st.session_state.description_detail = ""
-            st.session_state.amount = 0
-            st.session_state.date_input = date.today()
-            st.success("필드가 초기화되었습니다.")
+                st.error(f"오류 발생: {response.status_code}")
+                st.write(response.text)
+        else:
+            st.error("모든 필드가 올바르게 입력되어야 제출할 수 있습니다.")
