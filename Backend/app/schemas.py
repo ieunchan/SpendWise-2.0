@@ -20,3 +20,9 @@ class UserdataResponse(UserdataCreate):
 class ExpenseSummary(BaseModel):
     description: str
     total_amount: int
+
+class ExpenseDetail(BaseModel):
+    날짜: date
+    내역: str
+    상세내역: str
+    금액: int

@@ -3,8 +3,8 @@ from modules.ui_elements import display_expense_pie_chart, display_income_pie_ch
 from modules.utils import fetch_data
 from datetime import datetime
 import streamlit as st
-import time
 import pandas as pd
+import time  # 시간 측정을 위해 추가
 
 def data_analysis_page():
     """데이터 분석 페이지를 표시하는 함수"""
@@ -33,7 +33,7 @@ def data_analysis_page():
     if st.button("데이터 조회", key="for monthly data", use_container_width=True, type='primary'):
         st.session_state.monthly_data_fetched = True
         st.session_state.monthly_params = {"year": year, "month": month}
-        st.session_state.monthly_show_details = False  # 상세 조회 초기화
+        st.session_state.monthly_show_details = True  # 상세 조회 초기화
 
 
 
@@ -108,10 +108,11 @@ def display_expense_details(params, expense_ranking_api):
     # radio 버튼으로 항목 선택
     st.markdown("#### 자세히 볼 항목을 선택하세요")
     data = pd.DataFrame(expense_ranking_api)
-    selected_category = st.selectbox(
+    selected_category = st.radio(
         label="상세내역",
         options=data["description"].unique(),
-        index=0  # 기본값으로 첫 번째 항목 선택
+        index=0,  # 기본값으로 첫 번째 항목 선택
+        horizontal=True
     )
 
     # description 추가

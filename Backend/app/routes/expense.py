@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Userdata
 from app.utils import get_month_range
-from sqlalchemy.sql import func, and_
+from sqlalchemy.sql import func
 from sqlalchemy.exc import SQLAlchemyError
 from typing import List
-from app.schemas import ExpenseSummary
+from app.schemas import ExpenseSummary, ExpenseDetail
 
 # 지출 관련 API들이 모여있습니다.
 
@@ -76,7 +76,7 @@ def expense_ranking(
 
 
 # 지출 항목별 상세 내역 조회 API
-@router.get("/details/", response_model=List[dict])
+@router.get("/details/", response_model=List[ExpenseDetail])
 def get_expense_details(
     year: int = Query(..., description="조회할 년도"),
     month: int = Query(..., description="조회할 월"),
@@ -87,21 +87,24 @@ def get_expense_details(
 
     expense_details = (
         db.query(Userdata.description, Userdata.date, Userdata.description_detail, Userdata.amount)
-        .filter(Userdata.description == description)
-        .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
+        .filter(
+            Userdata.description == description,
+            Userdata.date.between(start_of_month, end_of_month)
+        )
         .all()
     )
+
+    # Pydantic 모델 사용
     details = [
-        {
-            "날짜": detail.date,
-            "내역": detail.description,
-            "상세내역": detail.description_detail,
-            "금액": detail.amount
-        }
+        ExpenseDetail(
+            날짜=detail.date,
+            내역=detail.description,
+            상세내역=detail.description_detail,
+            금액=detail.amount
+        )
         for detail in expense_details
     ]
     return details
-
 
 # 년간 지출 합계를 반환하는 API
 @router.get("/annual", response_model=List[ExpenseSummary])
