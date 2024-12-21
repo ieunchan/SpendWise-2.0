@@ -55,9 +55,14 @@ def income_expense_all_data(
         start_of_month, end_of_month = get_month_range(year, month)
         response_data = (
             db.query(Userdata)
-            .filter(Userdata.transaction_type == transaction_type)
-            .filter(Userdata.date >= start_of_month, Userdata.date < end_of_month)
-            .order_by(Userdata.id.desc())
+            .filter(
+                Userdata.transaction_type == transaction_type,
+                Userdata.date >= start_of_month, 
+                Userdata.date < end_of_month
+            )
+            .order_by(
+                Userdata.id.desc()
+            )
             .all()
         )
         return response_data

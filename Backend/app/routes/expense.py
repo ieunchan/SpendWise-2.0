@@ -114,7 +114,9 @@ def get_annual_expense_by_description(
 ):
     try:
         annual_expense = (
-            db.query(Userdata.description, func.sum(Userdata.amount).label("total_amount"))
+            db.query(Userdata.description, 
+                    func.sum(Userdata.amount).label("total_amount")
+                )
             .filter(
                     Userdata.transaction_type == '지출',
                     Userdata.date >= f"{year}-01-01",

@@ -9,7 +9,7 @@ config = AutoConfig()
 # DATABASE_URL = config("DATABASE_URL")
 
 
-# 환경 변수 가져오기
+# 환경 변수 가져오기(streamlit 배포용)
 DB_USER = config("DB_USER")
 DB_PASSWORD = config("DB_PASSWORD")
 DB_HOST = config("DB_HOST")

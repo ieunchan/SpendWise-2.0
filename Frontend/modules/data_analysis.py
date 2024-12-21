@@ -4,7 +4,6 @@ from modules.utils import fetch_data
 from datetime import datetime
 import streamlit as st
 import pandas as pd
-import time  # 시간 측정을 위해 추가
 
 def data_analysis_page():
     """데이터 분석 페이지를 표시하는 함수"""

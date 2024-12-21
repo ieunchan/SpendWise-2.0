@@ -66,7 +66,6 @@ def display_annual_expense_description_total(year, annual_expense_rank_api):
 
 def display_annual_income_description_total(year, annual_income_rank_api):
     
-
     if not annual_income_rank_api:
         st.write("데이터 로드 중 에러가 발생했습니다.")
         return
